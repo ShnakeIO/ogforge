@@ -32,11 +32,12 @@ This repo includes `.github/workflows/release.yml` which will build and attach i
 
 ## Host a download page on Render
 
-This repo includes a separate static landing page in `download/` (it links to your GitHub Releases).
+This repo includes a separate static landing page in `download/` (it links directly to your GitHub Releases assets).
 
 On Render, create a **Static Site**:
 
 - **Publish directory**: `download`
 - **Build command**: (leave empty)
 
-After you create a GitHub Release and upload your `.dmg`, update `download/index.html` to point at your repo’s releases URL.
+When you push a tag like `v1.0.0`, GitHub Actions will build installers and attach them to a GitHub Release.
+The download page will auto-detect the latest release and offer direct `.dmg` / `.exe` links.
