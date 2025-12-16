@@ -12,6 +12,7 @@
     "dist:win": "electron-builder --win nsis --x64 --publish never"
   },
   "devDependencies": {
+    "@electron/notarize": "^2.3.2",
     "electron": "^31.0.0",
     "electron-builder": "^24.13.3"
   },
@@ -26,11 +27,16 @@
       "index.html",
       "electron/**/*"
     ],
+    "afterSign": "electron/notarize.js",
     "mac": {
       "target": [
         "dmg",
         "zip"
       ],
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "electron/entitlements.mac.plist",
+      "entitlementsInherit": "electron/entitlements.mac.inherit.plist",
       "category": "public.app-category.games"
     },
     "win": {

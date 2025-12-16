@@ -48,6 +48,21 @@ Put your built installers here and commit them:
 
 Render will serve them directly, and the download page will link to them.
 
+Important: if the macOS app says “damaged” on open, you need Apple notarization (below) or macOS will block it for most players.
+
 ### Option B (recommended if files are too big): GitHub Releases
 
 When you push a tag like `v1.0.0`, GitHub Actions will build installers and attach them to a GitHub Release.
+
+## macOS signing + notarization (so it opens normally)
+
+Unsigned Electron apps are often blocked by Gatekeeper with “is damaged and can’t be opened”.
+This repo supports Developer ID signing + notarization in `.github/workflows/release.yml` and `electron/notarize.js`.
+
+Add these GitHub repo secrets:
+
+- `MAC_CERTIFICATE_P12_BASE64`: base64 of your Developer ID Application `.p12`
+- `MAC_CERTIFICATE_PASSWORD`: password for that `.p12`
+- `APPLE_ID`: your Apple ID email
+- `APPLE_APP_SPECIFIC_PASSWORD`: an app-specific password for that Apple ID
+- `APPLE_TEAM_ID`: your Apple Developer Team ID
