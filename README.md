@@ -32,12 +32,22 @@ This repo includes `.github/workflows/release.yml` which will build and attach i
 
 ## Host a download page on Render
 
-This repo includes a separate static landing page in `download/` (it links directly to your GitHub Releases assets).
+This repo includes a separate static landing page in `download/`.
 
 On Render, create a **Static Site**:
 
 - **Publish directory**: `download`
 - **Build command**: (leave empty)
 
+### Option A (what the download page uses now): host installers in the repo
+
+Put your built installers here and commit them:
+
+- `download/assets/OGforge-mac.dmg`
+- `download/assets/OGforge-win.exe`
+
+Render will serve them directly, and the download page will link to them.
+
+### Option B (recommended if files are too big): GitHub Releases
+
 When you push a tag like `v1.0.0`, GitHub Actions will build installers and attach them to a GitHub Release.
-The download page will auto-detect the latest release and offer direct `.dmg` / `.exe` links.
