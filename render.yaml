@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: ogforge-download
+    env: static
+    staticPublishPath: download
+    pullRequestPreviewsEnabled: true

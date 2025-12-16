@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OGforge — Download</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body data-repo="YOUR_GITHUB_USER/YOUR_REPO">
+    <main class="wrap">
+      <header class="hero">
+        <div class="mark" aria-hidden="true"></div>
+        <h1>OGforge</h1>
+        <p>Download the desktop app (Mac DMG) and keep your mine progress saved.</p>
+      </header>
+
+      <section class="card">
+        <h2>Download</h2>
+        <p class="muted">One-click download for your device. If auto-detect fails, use the links below.</p>
+        <a id="btn-download" class="btn" href="#" rel="noreferrer">Download OGforge</a>
+        <div class="subrow">
+          <a id="link-mac" class="link" href="#" rel="noreferrer">Mac (.dmg)</a>
+          <a id="link-win" class="link" href="#" rel="noreferrer">Windows (.exe)</a>
+          <a id="link-release" class="link" href="#" target="_blank" rel="noreferrer">All releases</a>
+        </div>
+        <p id="dl-note" class="hint"></p>
+      </section>
+
+      <section class="card">
+        <h2>Build It Yourself (Mac)</h2>
+        <ol>
+          <li><code>npm install</code></li>
+          <li><code>npm run dist:mac</code></li>
+          <li>Find the app installers in <code>dist/</code></li>
+        </ol>
+      </section>
+
+      <footer class="foot">
+        <span class="muted">OGforge</span>
+      </footer>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

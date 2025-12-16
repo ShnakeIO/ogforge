@@ -1,0 +1,42 @@
+{
+  "name": "ogforge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "OGforge - a single-file canvas mining game, packaged with Electron.",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "electron .",
+    "dist": "electron-builder",
+    "dist:ci": "electron-builder --publish never",
+    "dist:mac": "electron-builder --mac dmg zip --publish never",
+    "dist:win": "electron-builder --win nsis --publish never"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.ogforge.app",
+    "productName": "OGforge",
+    "directories": {
+      "output": "dist"
+    },
+    "artifactName": "OGforge-${version}-${os}-${arch}.${ext}",
+    "files": [
+      "index.html",
+      "electron/**/*"
+    ],
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.games"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    }
+  }
+}
