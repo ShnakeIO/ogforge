@@ -3,4 +3,4 @@ services:
     name: ogforge-download
     env: static
     buildCommand: ""
-    staticPublishPath: .
+    staticPublishPath: download
