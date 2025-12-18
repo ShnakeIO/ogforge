@@ -1,0 +1,185 @@
+:root {
+  --bg0: #07070a;
+  --bg1: #0c0c12;
+  --card: rgba(18, 18, 27, 0.72);
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #eef0ff;
+  --muted: rgba(238, 240, 255, 0.7);
+  --accent: #ff4d6d;
+  --accent2: #55a4ff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
+    "Segoe UI Emoji";
+  color: var(--text);
+  background: radial-gradient(1200px 600px at 20% 0%, rgba(255, 77, 109, 0.12), transparent 60%),
+    radial-gradient(900px 500px at 80% 10%, rgba(85, 164, 255, 0.12), transparent 55%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+}
+
+.wrap {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 28px 18px 22px;
+}
+
+.hero {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  padding: 18px 16px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(10, 10, 16, 0.55);
+  backdrop-filter: blur(10px);
+}
+
+.logo {
+  width: 68px;
+  height: 68px;
+  flex: 0 0 auto;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+h1 {
+  margin: 0;
+  font-size: 34px;
+  letter-spacing: 0.2px;
+}
+
+.sub {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.card {
+  margin-top: 18px;
+  padding: 18px 16px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--card);
+  backdrop-filter: blur(12px);
+}
+
+.card h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.status {
+  margin: 10px 0 0;
+  color: var(--muted);
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+@media (min-width: 720px) {
+  .buttons {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 14px;
+  text-decoration: none;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(18, 18, 27, 0.92);
+  color: var(--text);
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(26, 26, 39, 0.95);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn#dl-win {
+  box-shadow: inset 0 0 0 1px rgba(85, 164, 255, 0.22), 0 14px 30px rgba(0, 0, 0, 0.35);
+}
+
+.btn#dl-mac {
+  box-shadow: inset 0 0 0 1px rgba(255, 77, 109, 0.22), 0 14px 30px rgba(0, 0, 0, 0.35);
+}
+
+.fine {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.10);
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.fine p {
+  margin: 6px 0;
+}
+
+.k {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.16);
+  color: rgba(238, 240, 255, 0.85);
+}
+
+.actions {
+  margin-top: 12px;
+}
+
+.linkbtn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: rgba(238, 240, 255, 0.75);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.linkbtn:hover {
+  color: rgba(238, 240, 255, 0.9);
+}
+
+.foot {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+  color: rgba(238, 240, 255, 0.55);
+  font-size: 13px;
+}
+
+.dot {
+  opacity: 0.5;
+}
+
+.muted {
+  color: rgba(238, 240, 255, 0.55);
+}
+
