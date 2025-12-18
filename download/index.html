@@ -20,7 +20,7 @@
 
       <section class="card">
         <h2>Download</h2>
-        <p id="status" class="status">Detecting your OS…</p>
+        <p id="status" class="status">Choose your platform.</p>
 
         <div class="buttons">
           <a id="dl-win" class="btn" href="downloads/OGforge.exe?v=2" download>Download for Windows (.exe)</a>
@@ -33,7 +33,7 @@
         </div>
 
         <div class="actions">
-          <button id="cancel" class="linkbtn" type="button">Cancel auto-download</button>
+          <span class="muted">Tip: On macOS, open the .dmg and drag the app into Applications.</span>
         </div>
       </section>
 
@@ -47,38 +47,11 @@
     <script>
       (function () {
         const statusEl = document.getElementById('status');
-        const cancelEl = document.getElementById('cancel');
-        const winLink = document.getElementById('dl-win');
-        const macLink = document.getElementById('dl-mac');
         const ua = navigator.userAgent || '';
-
         const isWindows = /Windows/i.test(ua);
         const isMac = /Macintosh|Mac OS X|Mac_PowerPC|MacIntel/i.test(ua) && !isWindows;
-
-        const target = isWindows ? 'downloads/OGforge.exe?v=2' : isMac ? 'downloads/OGforge.dmg?v=2' : null;
-        const label = isWindows ? 'Windows' : isMac ? 'macOS' : 'your OS';
-        const linkEl = isWindows ? winLink : isMac ? macLink : null;
-
-        let canceled = false;
-        cancelEl.addEventListener('click', () => {
-          canceled = true;
-          statusEl.textContent = 'Auto-download canceled — pick a download above.';
-        });
-
-        if (!target) {
-          statusEl.textContent = 'Couldn’t detect your OS — pick a download above.';
-          return;
-        }
-
-        statusEl.textContent = `Detected ${label}. Starting download… (if it doesn’t start, click the button above)`;
-
-        setTimeout(() => {
-          if (canceled) return;
-          try {
-            if (linkEl && typeof linkEl.click === 'function') linkEl.click();
-          } catch {}
-          window.location.replace(target);
-        }, 900);
+        if (isWindows) statusEl.textContent = 'Detected Windows — click “Download for Windows”.';
+        else if (isMac) statusEl.textContent = 'Detected macOS — click “Download for macOS”.';
       })();
     </script>
   </body>
