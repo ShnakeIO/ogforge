@@ -23,8 +23,8 @@
         <p id="status" class="status">Detecting your OS…</p>
 
         <div class="buttons">
-          <a id="dl-win" class="btn" href="downloads/OGforge.exe" download>Download for Windows (.exe)</a>
-          <a id="dl-mac" class="btn" href="downloads/OGforge.dmg" download>Download for macOS (.dmg)</a>
+          <a id="dl-win" class="btn" href="downloads/OGforge.exe?v=2" download>Download for Windows (.exe)</a>
+          <a id="dl-mac" class="btn" href="downloads/OGforge.dmg?v=2" download>Download for macOS (.dmg)</a>
         </div>
 
         <div class="fine">
@@ -55,7 +55,7 @@
         const isWindows = /Windows/i.test(ua);
         const isMac = /Macintosh|Mac OS X|Mac_PowerPC|MacIntel/i.test(ua) && !isWindows;
 
-        const target = isWindows ? 'downloads/OGforge.exe' : isMac ? 'downloads/OGforge.dmg' : null;
+        const target = isWindows ? 'downloads/OGforge.exe?v=2' : isMac ? 'downloads/OGforge.dmg?v=2' : null;
         const label = isWindows ? 'Windows' : isMac ? 'macOS' : 'your OS';
         const linkEl = isWindows ? winLink : isMac ? macLink : null;
 
