@@ -335,6 +335,24 @@
             justify-content: center;
         }
 
+        .code-row{
+            display:flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .code-row .input{
+            flex: 1 1 auto;
+        }
+        .code-status{
+            margin-top: 8px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .2px;
+            color: rgba(238,240,255,.70);
+        }
+        .code-status.good{ color: rgba(50,213,131,.95); }
+        .code-status.bad{ color: rgba(255,176,32,.95); }
+
         #message-area {
             position: absolute;
             bottom: 20%;
@@ -505,6 +523,7 @@
                 <button class="forge-tab active" data-tab="sell" type="button">Sell</button>
                 <button class="forge-tab" data-tab="upgrades" type="button">Upgrades</button>
                 <button class="forge-tab" data-tab="tools" type="button">Tools</button>
+                <button class="forge-tab" data-tab="codes" type="button">Codes</button>
             </div>
         </div>
 
@@ -621,6 +640,19 @@
                 </button>
             </div>
 
+            <div class="forge-tab-panel" data-panel="codes" role="tabpanel">
+                <div class="forge-panel">
+                    <div class="forge-kicker">Trader Code</div>
+                    <div class="forge-muted">Enter a code from the trader.</div>
+                    <div style="height:10px"></div>
+                    <div class="code-row">
+                        <input id="forge-code-input" class="input" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="Enter code" maxlength="32">
+                        <button id="forge-code-btn" class="btn-mini primary" type="button" onclick="game.redeemTraderCodeFromUi()">Redeem</button>
+                    </div>
+                    <div id="forge-code-status" class="code-status">Codes are case-insensitive.</div>
+                </div>
+            </div>
+
         </div>
 
         <div class="forge-footer">
@@ -733,6 +765,7 @@ const OGFORGE_STORAGE = (() => {
 
 const UPDATE_DISMISS_KEY = 'ogforge-update-dismissed-v1';
 const UPDATE_CHECK_INTERVAL_MS = 10 * 60 * 1000;
+const TRADER_CODE_USED_KEY = 'ogforge-trader-code-hiilikefeet-used-v1';
 
 function safeGet(key) {
     try { return OGFORGE_STORAGE.getItem(key); } catch { return null; }
@@ -2092,12 +2125,67 @@ class Game {
         this.isForgeOpen = true;
         document.getElementById('forge-menu').style.display = 'block';
         if (window.ForgeUi) ForgeUi.onOpen();
+        this.refreshTraderCodeUi();
         this.updateUi();
     }
     
     closeForge() {
         this.isForgeOpen = false;
         document.getElementById('forge-menu').style.display = 'none';
+    }
+
+    refreshTraderCodeUi() {
+        const input = document.getElementById('forge-code-input');
+        const button = document.getElementById('forge-code-btn');
+        const status = document.getElementById('forge-code-status');
+        if (!input || !button || !status) return;
+
+        const used = safeGet(TRADER_CODE_USED_KEY) === '1';
+        input.disabled = used;
+        button.disabled = used;
+        if (used) {
+            status.classList.remove('bad');
+            status.classList.add('good');
+            status.textContent = 'Code already redeemed.';
+        } else {
+            status.classList.remove('good', 'bad');
+            status.textContent = 'Codes are case-insensitive.';
+        }
+    }
+
+    redeemTraderCodeFromUi() {
+        const input = document.getElementById('forge-code-input');
+        const status = document.getElementById('forge-code-status');
+        if (!input || !status) return;
+
+        const raw = String(input.value || '');
+        const code = raw.trim().toLowerCase();
+        if (!code) return;
+
+        if (safeGet(TRADER_CODE_USED_KEY) === '1') {
+            status.classList.remove('good');
+            status.classList.add('bad');
+            status.textContent = 'That code was already used.';
+            this.refreshTraderCodeUi();
+            return;
+        }
+
+        if (code !== 'hiilikefeet') {
+            status.classList.remove('good');
+            status.classList.add('bad');
+            status.textContent = 'Invalid code.';
+            return;
+        }
+
+        this.player.money += 40000;
+        safeSet(TRADER_CODE_USED_KEY, '1');
+        input.value = '';
+        status.classList.remove('bad');
+        status.classList.add('good');
+        status.textContent = 'Redeemed: +$40,000';
+        this.updateUi();
+        this.saveProgress();
+        this.refreshTraderCodeUi();
     }
 
     buyDrillRig() {
@@ -2855,6 +2943,15 @@ window.ForgeUi = {
             t.addEventListener('click', () => this.setTab(t.dataset.tab || 'sell'));
         }
 
+        const codeInput = document.getElementById('forge-code-input');
+        if (codeInput) {
+            codeInput.addEventListener('keydown', (e) => {
+                if (e.key !== 'Enter') return;
+                e.preventDefault();
+                try { if (window.game && typeof window.game.redeemTraderCodeFromUi === 'function') window.game.redeemTraderCodeFromUi(); } catch {}
+            });
+        }
+
         this.setTab(this.tab);
         this.refreshMineLabel();
     },
@@ -2872,6 +2969,7 @@ window.ForgeUi = {
     onOpen() {
         this.refreshMineLabel();
         this.setTab(this.tab);
+        try { if (window.game && typeof window.game.refreshTraderCodeUi === 'function') window.game.refreshTraderCodeUi(); } catch {}
     },
     refreshMineLabel() {
         const el = document.getElementById('ui-mine-name');

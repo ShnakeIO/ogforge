@@ -1,9 +1,8 @@
 {
-  "version": "1.0.1",
-  "notes": "Update available.",
+  "version": "1.0.2",
+  "notes": "Adds a one-time trader code redeem + UI polish.",
   "downloads": {
     "win": "downloads/OGforge.exe",
     "mac": "downloads/OGforge.dmg"
   }
 }
-
