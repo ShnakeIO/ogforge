@@ -766,12 +766,46 @@ const OGFORGE_STORAGE = (() => {
 const UPDATE_DISMISS_KEY = 'ogforge-update-dismissed-v1';
 const UPDATE_CHECK_INTERVAL_MS = 10 * 60 * 1000;
 const TRADER_CODE_USED_KEY = 'ogforge-trader-code-hiilikefeet-used-v1';
+const REDEEMABLE_CODES_KEY = 'ogforge-redeemable-codes-v1';
 
 function safeGet(key) {
     try { return OGFORGE_STORAGE.getItem(key); } catch { return null; }
 }
 function safeSet(key, value) {
     try { OGFORGE_STORAGE.setItem(key, String(value)); } catch {}
+}
+
+function showToast(msg, ms = 4200) {
+    const toast = document.getElementById('boot-toast');
+    if (!toast) return;
+    toast.textContent = String(msg || '');
+    toast.style.opacity = '1';
+    window.setTimeout(() => (toast.style.opacity = '0'), ms);
+}
+
+function loadRedeemableCodes() {
+    try {
+        const raw = safeGet(REDEEMABLE_CODES_KEY);
+        if (!raw) return [];
+        const arr = JSON.parse(raw);
+        if (!Array.isArray(arr)) return [];
+        return arr.filter((x) => x && typeof x.code === 'string');
+    } catch {
+        return [];
+    }
+}
+
+function saveRedeemableCodes(list) {
+    try {
+        safeSet(REDEEMABLE_CODES_KEY, JSON.stringify(Array.isArray(list) ? list : []));
+    } catch {}
+}
+
+function generateRedeemCode() {
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const pick = () => alphabet[Math.floor(Math.random() * alphabet.length)];
+    const part = (n) => Array.from({ length: n }, pick).join('');
+    return `${part(4)}-${part(4)}`;
 }
 
 function setUpdateModalVisible(visible) {
@@ -2140,17 +2174,11 @@ class Game {
         const status = document.getElementById('forge-code-status');
         if (!input || !button || !status) return;
 
-        const used = safeGet(TRADER_CODE_USED_KEY) === '1';
-        input.disabled = used;
-        button.disabled = used;
-        if (used) {
-            status.classList.remove('bad');
-            status.classList.add('good');
-            status.textContent = 'Code already redeemed.';
-        } else {
-            status.classList.remove('good', 'bad');
-            status.textContent = 'Codes are case-insensitive.';
-        }
+        const feetUsed = safeGet(TRADER_CODE_USED_KEY) === '1';
+        input.disabled = false;
+        button.disabled = false;
+        status.classList.remove('good', 'bad');
+        status.textContent = feetUsed ? 'Tip: The special trader code has already been redeemed.' : 'Codes are case-insensitive.';
     }
 
     redeemTraderCodeFromUi() {
@@ -2159,33 +2187,64 @@ class Game {
         if (!input || !status) return;
 
         const raw = String(input.value || '');
-        const code = raw.trim().toLowerCase();
+        const code = raw.trim();
         if (!code) return;
 
-        if (safeGet(TRADER_CODE_USED_KEY) === '1') {
-            status.classList.remove('good');
-            status.classList.add('bad');
-            status.textContent = 'That code was already used.';
+        const normalized = code.toLowerCase();
+
+        if (normalized === 'hiilikefeet') {
+            if (safeGet(TRADER_CODE_USED_KEY) === '1') {
+                status.classList.remove('good');
+                status.classList.add('bad');
+                status.textContent = 'That code was already used.';
+                this.refreshTraderCodeUi();
+                return;
+            }
+
+            this.player.money += 40000;
+            safeSet(TRADER_CODE_USED_KEY, '1');
+            input.value = '';
+            status.classList.remove('bad');
+            status.classList.add('good');
+            status.textContent = 'Redeemed: +$40,000';
+            this.updateUi();
+            this.saveProgress();
             this.refreshTraderCodeUi();
             return;
         }
 
-        if (code !== 'hiilikefeet') {
-            status.classList.remove('good');
-            status.classList.add('bad');
-            status.textContent = 'Invalid code.';
+        const codes = loadRedeemableCodes();
+        const idx = codes.findIndex((c) => String(c.code).toLowerCase() === normalized);
+        if (idx >= 0) {
+            const entry = codes[idx];
+            if (entry.used) {
+                status.classList.remove('good');
+                status.classList.add('bad');
+                status.textContent = 'That code was already redeemed.';
+                return;
+            }
+
+            const rewardMoney = Number(entry.money || 0);
+            if (Number.isFinite(rewardMoney) && rewardMoney > 0) {
+                this.player.money += Math.floor(rewardMoney);
+            }
+            entry.used = true;
+            entry.usedAt = Date.now();
+            codes[idx] = entry;
+            saveRedeemableCodes(codes);
+
+            input.value = '';
+            status.classList.remove('bad');
+            status.classList.add('good');
+            status.textContent = rewardMoney > 0 ? `Redeemed: +$${Math.floor(rewardMoney).toLocaleString()}` : 'Redeemed.';
+            this.updateUi();
+            this.saveProgress();
             return;
         }
 
-        this.player.money += 40000;
-        safeSet(TRADER_CODE_USED_KEY, '1');
-        input.value = '';
-        status.classList.remove('bad');
-        status.classList.add('good');
-        status.textContent = 'Redeemed: +$40,000';
-        this.updateUi();
-        this.saveProgress();
-        this.refreshTraderCodeUi();
+        status.classList.remove('good');
+        status.classList.add('bad');
+        status.textContent = 'Invalid code.';
     }
 
     buyDrillRig() {
@@ -2476,6 +2535,23 @@ class Game {
         const cash = 25 + Math.floor(Math.random() * (30 + depth * 2));
         this.player.money += cash;
         this.spawnFloater(x - 10, y - 34, `+$${cash}`, '#32d583');
+
+        if (Math.random() < 0.28) {
+            const codes = loadRedeemableCodes();
+            if (codes.filter((c) => !c.used).length < 12) {
+                let newCode = generateRedeemCode();
+                const seen = new Set(codes.map((c) => String(c.code).toLowerCase()));
+                while (seen.has(newCode.toLowerCase())) newCode = generateRedeemCode();
+
+                const rewardMoney = 120 + Math.floor(depth * 6 + Math.random() * 160);
+                codes.push({ code: newCode, money: rewardMoney, used: false, createdAt: Date.now(), source: 'cache' });
+                saveRedeemableCodes(codes);
+
+                this.spawnFloater(x - 26, y - 56, `CODE: ${newCode}`, COLORS[T_CACHE]);
+                showToast(`Found a trader code: ${newCode} (Forge → Codes)`);
+            }
+        }
+
         this.updateUi();
     }
 

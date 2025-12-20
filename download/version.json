@@ -1,6 +1,6 @@
 {
-  "version": "1.0.2",
-  "notes": "Adds a one-time trader code redeem + UI polish.",
+  "version": "1.0.3",
+  "notes": "Fix: special code is one-time, other cache codes still redeemable.",
   "downloads": {
     "win": "downloads/OGforge.exe",
     "mac": "downloads/OGforge.dmg"
