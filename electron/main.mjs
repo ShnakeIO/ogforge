@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, net, shell } from 'electron';
 import fs from 'node:fs';
 import http from 'node:http';
 import https from 'node:https';
@@ -134,13 +134,75 @@ function resolveUrl(baseUrl, maybeRelativeUrl) {
   }
 }
 
-function fetchJson(url, { timeoutMs = 8000 } = {}) {
+function fetchJsonViaNet(url, { timeoutMs = 8000 } = {}) {
+  return new Promise((resolve) => {
+    let requestUrl;
+    try {
+      requestUrl = new URL(String(url)).toString();
+    } catch {
+      resolve({ ok: false, error: 'Invalid update URL.' });
+      return;
+    }
+
+    const req = net.request({
+      method: 'GET',
+      url: requestUrl
+    });
+
+    req.setHeader('accept', 'application/json');
+    req.setHeader('user-agent', `OGforge/${app.getVersion()} (Electron)`);
+
+    const timeout = setTimeout(() => {
+      try {
+        req.abort();
+      } catch {}
+      resolve({ ok: false, error: 'Update check timed out.' });
+    }, timeoutMs);
+
+    req.on('response', (res) => {
+      if (!res || !res.statusCode || res.statusCode < 200 || res.statusCode > 299) {
+        clearTimeout(timeout);
+        resolve({ ok: false, error: `Update server error (${res?.statusCode || 'no status'}).` });
+        return;
+      }
+
+      let body = '';
+      res.on('data', (chunk) => {
+        body += chunk.toString('utf8');
+        if (body.length > 512_000) {
+          try {
+            req.abort();
+          } catch {}
+          clearTimeout(timeout);
+          resolve({ ok: false, error: 'Update manifest too large.' });
+        }
+      });
+      res.on('end', () => {
+        clearTimeout(timeout);
+        try {
+          resolve({ ok: true, data: JSON.parse(body) });
+        } catch {
+          resolve({ ok: false, error: 'Invalid update manifest JSON.' });
+        }
+      });
+    });
+
+    req.on('error', () => {
+      clearTimeout(timeout);
+      resolve({ ok: false, error: 'Unable to reach update server.' });
+    });
+
+    req.end();
+  });
+}
+
+function fetchJsonViaNode(url, { timeoutMs = 8000 } = {}) {
   return new Promise((resolve) => {
     let parsed;
     try {
       parsed = new URL(url);
     } catch {
-      resolve(null);
+      resolve({ ok: false, error: 'Invalid update URL.' });
       return;
     }
 
@@ -157,7 +219,7 @@ function fetchJson(url, { timeoutMs = 8000 } = {}) {
       (res) => {
         if (!res || !res.statusCode || res.statusCode < 200 || res.statusCode > 299) {
           res?.resume?.();
-          resolve(null);
+          resolve({ ok: false, error: `Update server error (${res?.statusCode || 'no status'}).` });
           return;
         }
 
@@ -167,26 +229,34 @@ function fetchJson(url, { timeoutMs = 8000 } = {}) {
           body += chunk;
           if (body.length > 512_000) {
             req.destroy();
-            resolve(null);
+            resolve({ ok: false, error: 'Update manifest too large.' });
           }
         });
         res.on('end', () => {
           try {
-            resolve(JSON.parse(body));
+            resolve({ ok: true, data: JSON.parse(body) });
           } catch {
-            resolve(null);
+            resolve({ ok: false, error: 'Invalid update manifest JSON.' });
           }
         });
       }
     );
 
-    req.on('error', () => resolve(null));
+    req.on('error', () => resolve({ ok: false, error: 'Unable to reach update server.' }));
     req.setTimeout(timeoutMs, () => {
       req.destroy();
-      resolve(null);
+      resolve({ ok: false, error: 'Update check timed out.' });
     });
     req.end();
   });
+}
+
+async function fetchUpdateManifest(url, opts) {
+  try {
+    const r = await fetchJsonViaNet(url, opts);
+    if (r && r.ok) return r;
+  } catch {}
+  return fetchJsonViaNode(url, opts);
 }
 
 function registerUpdateIpc() {
@@ -195,13 +265,24 @@ function registerUpdateIpc() {
   ipcMain.handle('ogforge:update:check', async () => {
     const currentVersion = app.getVersion();
     const manifestUrl = getUpdateManifestUrl();
-    const manifest = await fetchJson(manifestUrl);
+    const manifestResult = await fetchUpdateManifest(manifestUrl, { timeoutMs: 9000 });
 
+    if (!manifestResult || !manifestResult.ok) {
+      return {
+        ok: false,
+        currentVersion,
+        error: manifestResult?.error || 'Unable to load update info.',
+        manifestUrl
+      };
+    }
+
+    const manifest = manifestResult.data;
     if (!manifest || !manifest.version) {
       return {
         ok: false,
         currentVersion,
-        error: 'Unable to load update info.'
+        error: 'Update manifest missing version.',
+        manifestUrl
       };
     }
 
@@ -223,7 +304,8 @@ function registerUpdateIpc() {
       updateAvailable,
       downloadUrl,
       notes: typeof manifest.notes === 'string' ? manifest.notes : null,
-      required: Boolean(manifest.required)
+      required: Boolean(manifest.required),
+      manifestUrl
     };
   });
 

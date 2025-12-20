@@ -1,6 +1,6 @@
 {
-  "version": "1.0.3",
-  "notes": "Fix: special code is one-time, other cache codes still redeemable.",
+  "version": "1.0.4",
+  "notes": "Fix: show update-check failures in-game and improve update networking.",
   "downloads": {
     "win": "downloads/OGforge.exe",
     "mac": "downloads/OGforge.dmg"
