@@ -21,10 +21,11 @@
       <section class="card">
         <h2>Download</h2>
         <p id="status" class="status">Choose your platform.</p>
+        <p id="ver" class="status" style="opacity:.8;margin-top:-6px">Loading latest version…</p>
 
         <div class="buttons">
-          <a id="dl-win" class="btn" href="downloads/OGforge.exe?v=5" download>Download for Windows (.exe)</a>
-          <a id="dl-mac" class="btn" href="downloads/OGforge.dmg?v=5" download>Download for macOS (.dmg)</a>
+          <a id="dl-win" class="btn" href="downloads/OGforge.exe" download>Download for Windows (.exe)</a>
+          <a id="dl-mac" class="btn" href="downloads/OGforge.dmg" download>Download for macOS (.dmg)</a>
         </div>
 
         <div class="fine">
@@ -47,11 +48,28 @@
     <script>
       (function () {
         const statusEl = document.getElementById('status');
+        const verEl = document.getElementById('ver');
+        const winBtn = document.getElementById('dl-win');
+        const macBtn = document.getElementById('dl-mac');
         const ua = navigator.userAgent || '';
         const isWindows = /Windows/i.test(ua);
         const isMac = /Macintosh|Mac OS X|Mac_PowerPC|MacIntel/i.test(ua) && !isWindows;
         if (isWindows) statusEl.textContent = 'Detected Windows — click “Download for Windows”.';
         else if (isMac) statusEl.textContent = 'Detected macOS — click “Download for macOS”.';
+
+        fetch('version.json', { cache: 'no-store' })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((j) => {
+            const v = j && j.version ? String(j.version) : null;
+            if (v) verEl.textContent = `Latest version: v${v}`;
+            const w = j && j.downloads && j.downloads.win ? String(j.downloads.win) : null;
+            const m = j && j.downloads && j.downloads.mac ? String(j.downloads.mac) : null;
+            if (w) winBtn.href = `${w}?v=${encodeURIComponent(v || '')}`;
+            if (m) macBtn.href = `${m}?v=${encodeURIComponent(v || '')}`;
+          })
+          .catch(() => {
+            verEl.textContent = 'Latest version: unknown';
+          });
       })();
     </script>
   </body>

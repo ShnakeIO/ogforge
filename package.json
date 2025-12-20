@@ -1,0 +1,54 @@
+{
+  "name": "ogforge",
+  "productName": "OGforge",
+  "version": "1.0.1",
+  "private": true,
+  "type": "module",
+  "main": "electron/main.mjs",
+  "scripts": {
+    "dev": "electron .",
+    "generate-icons": "node scripts/generate-icons.mjs",
+    "dist:mac": "npm run generate-icons && electron-builder --mac dmg",
+    "dist:win": "npm run generate-icons && electron-builder --win portable --x64",
+    "dist:all": "npm run dist:mac && npm run dist:win"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.ogforge.ogforge",
+    "productName": "OGforge",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "index.html",
+      "electron/**",
+      "assets/**",
+      "build/icon.png"
+    ],
+    "afterPack": "electron/afterPack.cjs",
+    "asar": true,
+    "mac": {
+      "category": "public.app-category.games",
+      "target": [
+        "dmg"
+      ],
+      "icon": "build/icon.png"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    }
+  }
+}
+

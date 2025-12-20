@@ -1,0 +1,9 @@
+{
+  "version": "1.0.1",
+  "notes": "Update available.",
+  "downloads": {
+    "win": "downloads/OGforge.exe",
+    "mac": "downloads/OGforge.dmg"
+  }
+}
+

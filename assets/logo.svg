@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#07070a"/>
+      <stop offset="1" stop-color="#0c0c12"/>
+    </linearGradient>
+    <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d9e2f2"/>
+      <stop offset="1" stop-color="#7c879f"/>
+    </linearGradient>
+    <linearGradient id="wood" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b77a39"/>
+      <stop offset="1" stop-color="#5c3a1b"/>
+    </linearGradient>
+    <radialGradient id="ruby" cx="0.4" cy="0.35" r="0.8">
+      <stop offset="0" stop-color="#ffd0da"/>
+      <stop offset="0.4" stop-color="#ff4d6d"/>
+      <stop offset="1" stop-color="#7a1426"/>
+    </radialGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.6 0" result="g"/>
+      <feMerge>
+        <feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="256" height="256" rx="52" fill="url(#bg)"/>
+  <path d="M78 204 L186 84" stroke="url(#wood)" stroke-width="34" stroke-linecap="round"/>
+  <path d="M70 212 L178 92" stroke="#000" stroke-opacity="0.28" stroke-width="46" stroke-linecap="round"/>
+  <path d="M110 78 L212 136" stroke="#000" stroke-opacity="0.22" stroke-width="44" stroke-linecap="round"/>
+  <path d="M104 70 L206 128" stroke="url(#steel)" stroke-width="32" stroke-linecap="round"/>
+  <circle cx="144" cy="120" r="18" fill="url(#ruby)" filter="url(#glow)"/>
+</svg>
+
