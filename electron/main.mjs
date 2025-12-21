@@ -8,11 +8,20 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const appRoot = path.join(__dirname, '..');
-const DEFAULT_UPDATE_MANIFEST_URL = 'https://forge-iye0.onrender.com/version.json';
+const DEFAULT_UPDATE_MANIFEST_URLS = [
+  'https://raw.githubusercontent.com/ShnakeIO/ogforge/main/download/version.json',
+  'https://forge-iye0.onrender.com/version.json'
+];
 
-function getUpdateManifestUrl() {
-  const u = process.env.OGFORGE_UPDATE_URL || DEFAULT_UPDATE_MANIFEST_URL;
-  return String(u);
+function getUpdateManifestUrls() {
+  const env = process.env.OGFORGE_UPDATE_URL;
+  if (env && String(env).trim()) {
+    return String(env)
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean);
+  }
+  return DEFAULT_UPDATE_MANIFEST_URLS.slice();
 }
 
 function ensureDirSync(dirPath) {
@@ -251,12 +260,19 @@ function fetchJsonViaNode(url, { timeoutMs = 8000 } = {}) {
   });
 }
 
-async function fetchUpdateManifest(url, opts) {
-  try {
-    const r = await fetchJsonViaNet(url, opts);
-    if (r && r.ok) return r;
-  } catch {}
-  return fetchJsonViaNode(url, opts);
+async function fetchUpdateManifest(urls, opts) {
+  const list = Array.isArray(urls) ? urls : [urls];
+  for (const url of list) {
+    try {
+      const r = await fetchJsonViaNet(url, opts);
+      if (r && r.ok) return { ...r, manifestUrl: url };
+    } catch {}
+    try {
+      const r = await fetchJsonViaNode(url, opts);
+      if (r && r.ok) return { ...r, manifestUrl: url };
+    } catch {}
+  }
+  return { ok: false, error: 'Unable to reach update server.' };
 }
 
 function registerUpdateIpc() {
@@ -264,8 +280,9 @@ function registerUpdateIpc() {
 
   ipcMain.handle('ogforge:update:check', async () => {
     const currentVersion = app.getVersion();
-    const manifestUrl = getUpdateManifestUrl();
-    const manifestResult = await fetchUpdateManifest(manifestUrl, { timeoutMs: 9000 });
+    const manifestUrls = getUpdateManifestUrls();
+    const manifestResult = await fetchUpdateManifest(manifestUrls, { timeoutMs: 9000 });
+    const manifestUrl = manifestResult?.manifestUrl || manifestUrls[0] || '';
 
     if (!manifestResult || !manifestResult.ok) {
       return {

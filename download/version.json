@@ -2,7 +2,7 @@
   "version": "1.0.4",
   "notes": "Fix: show update-check failures in-game and improve update networking.",
   "downloads": {
-    "win": "downloads/OGforge.exe",
-    "mac": "downloads/OGforge.dmg"
+    "win": "https://forge-iye0.onrender.com/downloads/OGforge.exe",
+    "mac": "https://forge-iye0.onrender.com/downloads/OGforge.dmg"
   }
 }
