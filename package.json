@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "electron .",
     "generate-icons": "node scripts/generate-icons.mjs",
-    "dist:mac": "npm run generate-icons && electron-builder --mac dmg",
+    "dist:mac": "npm run generate-icons && electron-builder --mac zip",
     "dist:win": "npm run generate-icons && electron-builder --win portable --x64",
     "dist:all": "npm run dist:mac && npm run dist:win"
   },
@@ -34,7 +34,7 @@
     "mac": {
       "category": "public.app-category.games",
       "target": [
-        "dmg"
+        "zip"
       ],
       "icon": "build/icon.png"
     },
