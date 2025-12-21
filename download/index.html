@@ -25,16 +25,17 @@
 
         <div class="buttons">
           <a id="dl-win" class="btn" href="downloads/OGforge.exe" download>Download for Windows (.exe)</a>
-          <a id="dl-mac" class="btn" href="downloads/OGforge-mac.zip" download>Download for macOS (.zip)</a>
+          <a id="dl-mac" class="btn" href="downloads/OGforge.dmg" download>Download for macOS (.dmg)</a>
+          <a id="dl-mac-zip" class="btn ghost" href="downloads/OGforge-mac.zip" download>Download macOS (.zip)</a>
         </div>
 
         <div class="fine">
           <p><span class="k">Windows</span> Run the `.exe`.</p>
-          <p><span class="k">macOS</span> Unzip and drag `OGforge.app` into Applications.</p>
+          <p><span class="k">macOS</span> Open the `.dmg` and drag `OGforge.app` into Applications (or use the zip if you prefer).</p>
         </div>
 
         <div class="actions">
-          <span class="muted">Tip: On macOS, unzip and drag the app into Applications.</span>
+          <span class="muted">Tip: On macOS, open the .dmg and drag the app into Applications.</span>
         </div>
       </section>
 
@@ -51,6 +52,7 @@
         const verEl = document.getElementById('ver');
         const winBtn = document.getElementById('dl-win');
         const macBtn = document.getElementById('dl-mac');
+        const macZipBtn = document.getElementById('dl-mac-zip');
         const ua = navigator.userAgent || '';
         const isWindows = /Windows/i.test(ua);
         const isMac = /Macintosh|Mac OS X|Mac_PowerPC|MacIntel/i.test(ua) && !isWindows;
@@ -66,6 +68,7 @@
             const m = j && j.downloads && j.downloads.mac ? String(j.downloads.mac) : null;
             if (w) winBtn.href = `${w}?v=${encodeURIComponent(v || '')}`;
             if (m) macBtn.href = `${m}?v=${encodeURIComponent(v || '')}`;
+            if (m && macZipBtn) macZipBtn.href = 'downloads/OGforge-mac.zip';
           })
           .catch(() => {
             verEl.textContent = 'Latest version: unknown';
