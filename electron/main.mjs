@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const appRoot = path.join(__dirname, '..');
 const DEFAULT_UPDATE_MANIFEST_URLS = [
-  'https://raw.githubusercontent.com/ShnakeIO/ogforge/main/download/version.json',
+  'https://shnakeio.github.io/ogforge/download/version.json',
   'https://forge-iye0.onrender.com/version.json'
 ];
 
