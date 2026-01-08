@@ -1,4 +1,5 @@
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import { autoUpdater } from 'electron-updater';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -6,6 +7,9 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const appRoot = path.join(__dirname, '..');
+let mainWindow = null;
+let updaterEnabled = false;
+let updaterReady = false;
 
 function ensureDirSync(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
@@ -97,6 +101,97 @@ function registerStorageIpc() {
   });
 }
 
+function pickUpdateInfo(info) {
+  if (!info) return null;
+  return {
+    version: info.version || '',
+    releaseName: info.releaseName || '',
+    releaseDate: info.releaseDate || ''
+  };
+}
+
+function sendUpdaterStatus(payload) {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  mainWindow.webContents.send('ogforge-updater:status', payload);
+}
+
+function initAutoUpdater() {
+  if (updaterReady) return;
+  updaterReady = true;
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  autoUpdater.on('checking-for-update', () => {
+    sendUpdaterStatus({ state: 'checking' });
+  });
+  autoUpdater.on('update-available', (info) => {
+    sendUpdaterStatus({ state: 'available', info: pickUpdateInfo(info) });
+  });
+  autoUpdater.on('update-not-available', (info) => {
+    sendUpdaterStatus({ state: 'none', info: pickUpdateInfo(info) });
+  });
+  autoUpdater.on('error', (err) => {
+    sendUpdaterStatus({ state: 'error', message: err?.message || String(err) });
+  });
+  autoUpdater.on('download-progress', (progress) => {
+    sendUpdaterStatus({
+      state: 'downloading',
+      progress: {
+        percent: Number.isFinite(progress?.percent) ? progress.percent : 0,
+        transferred: progress?.transferred || 0,
+        total: progress?.total || 0
+      }
+    });
+  });
+  autoUpdater.on('update-downloaded', (info) => {
+    sendUpdaterStatus({ state: 'downloaded', info: pickUpdateInfo(info) });
+    setTimeout(() => {
+      try {
+        autoUpdater.quitAndInstall();
+      } catch {}
+    }, 2500);
+  });
+}
+
+function registerUpdaterIpc() {
+  ipcMain.handle('ogforge-updater:enable', async () => {
+    if (!app.isPackaged) return { ok: false, reason: 'not_packaged' };
+    updaterEnabled = true;
+    initAutoUpdater();
+    try {
+      await autoUpdater.checkForUpdates();
+      return { ok: true };
+    } catch (err) {
+      sendUpdaterStatus({ state: 'error', message: err?.message || String(err) });
+      return { ok: false, reason: 'check_failed' };
+    }
+  });
+
+  ipcMain.handle('ogforge-updater:check', async () => {
+    if (!app.isPackaged) return { ok: false, reason: 'not_packaged' };
+    if (!updaterEnabled) return { ok: false, reason: 'disabled' };
+    initAutoUpdater();
+    try {
+      await autoUpdater.checkForUpdates();
+      return { ok: true };
+    } catch (err) {
+      sendUpdaterStatus({ state: 'error', message: err?.message || String(err) });
+      return { ok: false, reason: 'check_failed' };
+    }
+  });
+
+  ipcMain.handle('ogforge-updater:install', async () => {
+    if (!app.isPackaged) return { ok: false, reason: 'not_packaged' };
+    try {
+      autoUpdater.quitAndInstall();
+      return { ok: true };
+    } catch (err) {
+      sendUpdaterStatus({ state: 'error', message: err?.message || String(err) });
+      return { ok: false, reason: 'install_failed' };
+    }
+  });
+}
+
 function createWindow() {
   const preloadPath = path.join(__dirname, 'preload.mjs');
   const iconPath = path.join(appRoot, 'build', 'icon.png');
@@ -115,6 +210,7 @@ function createWindow() {
   });
 
   win.once('ready-to-show', () => win.show());
+  mainWindow = win;
 
   win.webContents.setWindowOpenHandler(({ url }) => {
     try {
@@ -132,6 +228,7 @@ function createWindow() {
 
 app.whenReady().then(() => {
   registerStorageIpc();
+  registerUpdaterIpc();
   createWindow();
 
   app.on('activate', () => {

@@ -6,3 +6,15 @@ contextBridge.exposeInMainWorld('ogforgeStore', {
   removeItem: (key) => ipcRenderer.sendSync('ogforge:removeItem', key),
   getSavesDir: () => ipcRenderer.sendSync('ogforge:getSavesDir')
 });
+
+contextBridge.exposeInMainWorld('ogforgeUpdater', {
+  enable: () => ipcRenderer.invoke('ogforge-updater:enable'),
+  check: () => ipcRenderer.invoke('ogforge-updater:check'),
+  install: () => ipcRenderer.invoke('ogforge-updater:install'),
+  onStatus: (cb) => {
+    if (typeof cb !== 'function') return () => {};
+    const handler = (_event, payload) => cb(payload);
+    ipcRenderer.on('ogforge-updater:status', handler);
+    return () => ipcRenderer.removeListener('ogforge-updater:status', handler);
+  }
+});
