@@ -1,8 +1,8 @@
-version: 1.0.7
+version: 1.0.8
 files:
-  - url: OGforge Setup 1.0.7.exe
-    sha512: I0YmuaEeJqQz7x+IMHWB04UNPfMwLh4INdhbxCJwyZ7GrN+hY5Xk4/X0Uw11Jt1WgljPXH0a30CCuLux8W8oUA==
-    size: 82049483
-path: OGforge Setup 1.0.7.exe
-sha512: I0YmuaEeJqQz7x+IMHWB04UNPfMwLh4INdhbxCJwyZ7GrN+hY5Xk4/X0Uw11Jt1WgljPXH0a30CCuLux8W8oUA==
-releaseDate: '2026-01-08T17:57:08.585Z'
+  - url: OGforge Setup 1.0.8.exe
+    sha512: X/TSgsukyZjMAXFF4T/FAka8AMjAULsHhdanlSa3ifMm/2uQcF1PfJlvf67e8tO7GplJjtdT1edh2K59/XdZcQ==
+    size: 82049562
+path: OGforge Setup 1.0.8.exe
+sha512: X/TSgsukyZjMAXFF4T/FAka8AMjAULsHhdanlSa3ifMm/2uQcF1PfJlvf67e8tO7GplJjtdT1edh2K59/XdZcQ==
+releaseDate: '2026-01-08T18:59:57.064Z'
