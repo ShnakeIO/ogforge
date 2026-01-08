@@ -96,6 +96,31 @@
             box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 6px 18px rgba(0,0,0,.35);
         }
 
+        .tp-btn{
+            margin-top: 8px;
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,215,140,.22);
+            background: linear-gradient(180deg, rgba(24,18,10,.9), rgba(12,9,6,.9));
+            color: rgba(255,236,190,.9);
+            font-weight: 800;
+            font-size: 11px;
+            letter-spacing: .4px;
+            cursor: pointer;
+        }
+        .tp-btn:hover{
+            border-color: rgba(255,215,140,.4);
+            transform: translateY(-1px);
+        }
+        .tp-btn:active{
+            transform: translateY(0);
+        }
+
         .money { color: var(--good); }
         .ore-coal { color: rgba(238,240,255,.78); }
         .ore-iron { color: #ffb86c; }
@@ -635,6 +660,7 @@
                 <div class="stat-row money"><span class="stat-icon" style="background:#50fa7b"></span> $<span id="ui-money">0</span></div>
                 <div class="stat-row" style="margin-bottom:0;color:rgba(238,240,255,.78)"><span class="stat-icon" style="background:#7c5cff"></span> Depth <span id="ui-depth">0</span></div>
                 <div class="stat-row" style="margin-bottom:0;color:rgba(238,240,255,.78)"><span class="stat-icon" style="background:#ffb020"></span> Drills <span id="ui-drills">0</span></div>
+                <button class="tp-btn" id="btn-return-base" type="button">Return to Base</button>
             </div>
             <div class="xp-box">
                 <div class="xp-label">
@@ -2453,7 +2479,7 @@ class InfiniteMap {
 
         const seed = this._h(cellX, cellY, 0x4f1d);
         const chance = seeded01(seed ^ 0x7a11);
-        if (chance > 0.004) return null;
+        if (chance > 0.01) return null;
 
         const offsetX = 6 + Math.floor(seeded01(seed ^ 0x9baf) * (spacing - 18));
         const offsetY = 6 + Math.floor(seeded01(seed ^ 0x5c91) * (spacing - 18));
@@ -2981,6 +3007,38 @@ class Game {
         if (xpEl) xpEl.textContent = current;
         if (xpNextEl) xpNextEl.textContent = next;
         if (xpFill) xpFill.style.width = `${(pct * 100).toFixed(1)}%`;
+    }
+
+    getBestInventoryOre() {
+        let best = null;
+        for (const ore of ORES) {
+            const count = this.player.inventory[ore.key] || 0;
+            if (count <= 0) continue;
+            if (!best || ORE_VALUE[ore.key] > ORE_VALUE[best.key]) best = ore;
+        }
+        return best;
+    }
+
+    returnToBase() {
+        const best = this.getBestInventoryOre();
+        if (!best) {
+            showToast('You have no ore to pay the toll.');
+            return;
+        }
+        const ok = window.confirm(`Return to base for 1 ${best.name}?`);
+        if (!ok) return;
+        this.player.inventory[best.key] -= 1;
+        if (this.inArena) {
+            this.exitArena(false);
+        } else {
+            const spawnX = this.map.spawnTile.x * TILE_SIZE + TILE_SIZE / 2;
+            const spawnY = this.map.spawnTile.y * TILE_SIZE + TILE_SIZE / 2;
+            this.player.x = spawnX;
+            this.player.y = spawnY;
+            this.saveProgress();
+        }
+        this.updateUi();
+        showToast('Back at base.');
     }
 
     getArenaRoom(info) {
@@ -4192,6 +4250,13 @@ function bootGame() {
     if (toast) {
         toast.style.opacity = '1';
         window.setTimeout(() => (toast.style.opacity = '0'), 4200);
+    }
+
+    const tpBtn = document.getElementById('btn-return-base');
+    if (tpBtn) {
+        tpBtn.addEventListener('click', () => {
+            if (game) game.returnToBase();
+        });
     }
 }
 
