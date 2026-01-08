@@ -120,6 +120,30 @@
         .tp-btn:active{
             transform: translateY(0);
         }
+        .update-btn{
+            margin-top: 8px;
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,205,110,.28);
+            background: linear-gradient(180deg, rgba(24,20,14,.92), rgba(12,10,8,.92));
+            color: rgba(255,232,170,.9);
+            font-weight: 800;
+            font-size: 11px;
+            letter-spacing: .4px;
+            cursor: pointer;
+        }
+        .update-btn:hover{
+            border-color: rgba(255,205,110,.5);
+            transform: translateY(-1px);
+        }
+        .update-btn:active{
+            transform: translateY(0);
+        }
 
         .money { color: var(--good); }
         .ore-coal { color: rgba(238,240,255,.78); }
@@ -714,6 +738,7 @@
                 <div class="stat-row money"><span class="stat-icon" style="background:#50fa7b"></span> $<span id="ui-money">0</span></div>
                 <div class="stat-row" style="margin-bottom:0;color:rgba(238,240,255,.78)"><span class="stat-icon" style="background:#7c5cff"></span> Depth <span id="ui-depth">0</span></div>
                 <div class="stat-row" style="margin-bottom:0;color:rgba(238,240,255,.78)"><span class="stat-icon" style="background:#ffb020"></span> Drills <span id="ui-drills">0</span></div>
+                <button class="update-btn" id="btn-check-update" type="button">Check for Update</button>
                 <button class="tp-btn" id="btn-return-base" type="button">Return to Base</button>
             </div>
             <div class="xp-box">
@@ -1131,40 +1156,6 @@ function generateRedeemCode() {
 
 const ORE_UI_STATE_KEY = 'ogforge-ore-ui-v1';
 const ORE_VISIBLE_KEY = 'ogforge-ore-visible-v1';
-const AUTO_UPDATE_PREF_KEY = 'ogforge-auto-update-v1';
-const AUTO_UPDATE_PROMPT_KEY = 'ogforge-auto-update-prompted-v1';
-
-const AutoUpdateUi = {
-    init() {
-        this.modal = document.getElementById('update-modal');
-        this.btnYes = document.getElementById('update-yes');
-        this.btnNo = document.getElementById('update-no');
-        if (!this.modal || !this.btnYes || !this.btnNo) return;
-
-        this.btnYes.addEventListener('click', () => {
-            safeSet(AUTO_UPDATE_PREF_KEY, 'yes');
-            safeSet(AUTO_UPDATE_PROMPT_KEY, '1');
-            this.hide();
-            startAutoUpdates();
-        });
-        this.btnNo.addEventListener('click', () => {
-            safeSet(AUTO_UPDATE_PREF_KEY, 'no');
-            safeSet(AUTO_UPDATE_PROMPT_KEY, '1');
-            this.hide();
-        });
-
-        this.modal.addEventListener('click', (e) => {
-            if (e.target === this.modal) this.hide();
-        });
-    },
-    show() {
-        if (this.modal) this.modal.hidden = false;
-    },
-    hide() {
-        if (this.modal) this.modal.hidden = true;
-    }
-};
-
 let autoUpdateStatusUnsub = null;
 let autoUpdateInterval = null;
 let autoUpdateLastPercent = -1;
@@ -1173,13 +1164,6 @@ let autoUpdateLastToast = 0;
 function updaterAvailable() {
     const u = window.ogforgeUpdater;
     return !!(u && typeof u.enable === 'function' && typeof u.check === 'function');
-}
-
-function isWifiConnection() {
-    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    if (!connection) return true;
-    if (typeof connection.type === 'string') return connection.type === 'wifi';
-    return false;
 }
 
 function initUpdateStatusUi() {
@@ -1213,28 +1197,26 @@ function initUpdateStatusUi() {
 function startAutoUpdates() {
     if (!updaterAvailable()) return;
     initUpdateStatusUi();
-    if (navigator.onLine !== false && isWifiConnection()) {
-        window.ogforgeUpdater.enable().catch(() => {});
-    }
+    window.ogforgeUpdater.enable().catch(() => {});
     if (!autoUpdateInterval) {
         autoUpdateInterval = window.setInterval(() => {
-            if (navigator.onLine === false || !isWifiConnection()) return;
             window.ogforgeUpdater.check().catch(() => {});
         }, 1000 * 60 * 30);
     }
 }
 
-function maybePromptAutoUpdates() {
-    if (!updaterAvailable()) return;
-    const pref = safeGet(AUTO_UPDATE_PREF_KEY);
-    if (pref === 'yes') {
-        startAutoUpdates();
+function requestUpdateCheck() {
+    if (!updaterAvailable()) {
+        showToast('Updates are available in the desktop app.');
         return;
     }
-    if (safeGet(AUTO_UPDATE_PROMPT_KEY) === '1') return;
-    if (navigator.onLine === false) return;
-    if (!isWifiConnection()) return;
-    AutoUpdateUi.show();
+    initUpdateStatusUi();
+    showToast('Checking for updates...');
+    window.ogforgeUpdater.check().then((res) => {
+        if (res && res.ok === false) showToast('Update check failed.');
+    }).catch(() => {
+        showToast('Update check failed.');
+    });
 }
 
 const OreUi = {
@@ -4396,7 +4378,6 @@ function bootGame() {
     OreUi.init();
     ForgeUi.init();
     MinesUi.init();
-    AutoUpdateUi.init();
     initUpdateStatusUi();
     const save = SaveManager.load();
     const slot = SaveManager.getCurrentSlot();
@@ -4419,13 +4400,12 @@ function bootGame() {
             if (game) game.returnToBase();
         });
     }
-
-    maybePromptAutoUpdates();
-    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    if (connection && typeof connection.addEventListener === 'function') {
-        connection.addEventListener('change', () => maybePromptAutoUpdates());
+    const updateBtn = document.getElementById('btn-check-update');
+    if (updateBtn) {
+        if (!updaterAvailable()) updateBtn.style.display = 'none';
+        updateBtn.addEventListener('click', () => requestUpdateCheck());
     }
-    window.addEventListener('online', () => maybePromptAutoUpdates());
+    startAutoUpdates();
 }
 
 bootGame();
