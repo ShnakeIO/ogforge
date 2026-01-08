@@ -119,7 +119,7 @@ function sendUpdaterStatus(payload) {
 function initAutoUpdater() {
   if (updaterReady) return;
   updaterReady = true;
-  autoUpdater.autoDownload = true;
+  autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = true;
 
   autoUpdater.on('checking-for-update', () => {
@@ -189,6 +189,19 @@ function registerUpdaterIpc() {
     } catch (err) {
       sendUpdaterStatus({ state: 'error', message: err?.message || String(err) });
       return { ok: false, reason: 'install_failed' };
+    }
+  });
+
+  ipcMain.handle('ogforge-updater:download', async () => {
+    if (!app.isPackaged) return { ok: false, reason: 'not_packaged' };
+    if (!updaterEnabled) return { ok: false, reason: 'disabled' };
+    initAutoUpdater();
+    try {
+      await autoUpdater.downloadUpdate();
+      return { ok: true };
+    } catch (err) {
+      sendUpdaterStatus({ state: 'error', message: err?.message || String(err) });
+      return { ok: false, reason: 'download_failed' };
     }
   });
 }

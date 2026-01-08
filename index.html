@@ -723,11 +723,11 @@
     <div id="boot-toast">You have to play — tap/click to mine. Saves forever.</div>
     <div id="update-modal" hidden>
         <div class="update-card" role="dialog" aria-modal="true" aria-labelledby="update-title">
-            <div class="update-title" id="update-title">Enable Auto Updates?</div>
-            <div class="update-copy">You're on Wi-Fi. Want OGforge to keep itself updated automatically?</div>
+            <div class="update-title" id="update-title">Update Available</div>
+            <div class="update-copy" id="update-copy">A new build is ready. Download it now?</div>
             <div class="update-actions">
-                <button class="btn btn-mini" type="button" id="update-no">Not now</button>
-                <button class="btn btn-mini primary" type="button" id="update-yes">Enable</button>
+                <button class="btn btn-mini" type="button" id="update-later">Later</button>
+                <button class="btn btn-mini primary" type="button" id="update-download">Download now</button>
             </div>
         </div>
     </div>
@@ -1160,6 +1160,39 @@ let autoUpdateStatusUnsub = null;
 let autoUpdateInterval = null;
 let autoUpdateLastPercent = -1;
 let autoUpdateLastToast = 0;
+let updatePromptOpen = false;
+
+const UpdatePrompt = {
+    init() {
+        this.modal = document.getElementById('update-modal');
+        this.title = document.getElementById('update-title');
+        this.copy = document.getElementById('update-copy');
+        this.btnDownload = document.getElementById('update-download');
+        this.btnLater = document.getElementById('update-later');
+        if (!this.modal || !this.btnDownload || !this.btnLater) return;
+
+        this.btnDownload.addEventListener('click', () => {
+            this.hide();
+            triggerUpdateDownload();
+        });
+        this.btnLater.addEventListener('click', () => this.hide());
+        this.modal.addEventListener('click', (e) => {
+            if (e.target === this.modal) this.hide();
+        });
+    },
+    show(title, copy) {
+        if (this.title && title) this.title.textContent = title;
+        if (this.copy && copy) this.copy.textContent = copy;
+        if (this.modal) {
+            this.modal.hidden = false;
+            updatePromptOpen = true;
+        }
+    },
+    hide() {
+        if (this.modal) this.modal.hidden = true;
+        updatePromptOpen = false;
+    }
+};
 
 function updaterAvailable() {
     const u = window.ogforgeUpdater;
@@ -1171,10 +1204,11 @@ function initUpdateStatusUi() {
     autoUpdateStatusUnsub = window.ogforgeUpdater.onStatus((payload) => {
         if (!payload || !payload.state) return;
         if (payload.state === 'available') {
-            showToast('Update found. Downloading...');
+            UpdatePrompt.show('Update Available', 'A new build is ready. Download it now?');
             return;
         }
         if (payload.state === 'downloading') {
+            if (updatePromptOpen) UpdatePrompt.hide();
             const percent = Math.floor(payload.progress?.percent || 0);
             const now = Date.now();
             if (percent >= autoUpdateLastPercent + 20 || now - autoUpdateLastToast > 9000) {
@@ -1216,6 +1250,16 @@ function requestUpdateCheck() {
         if (res && res.ok === false) showToast('Update check failed.');
     }).catch(() => {
         showToast('Update check failed.');
+    });
+}
+
+function triggerUpdateDownload() {
+    if (!updaterAvailable()) return;
+    showToast('Downloading update...');
+    window.ogforgeUpdater.download().then((res) => {
+        if (res && res.ok === false) showToast('Update download failed.');
+    }).catch(() => {
+        showToast('Update download failed.');
     });
 }
 
@@ -4378,6 +4422,7 @@ function bootGame() {
     OreUi.init();
     ForgeUi.init();
     MinesUi.init();
+    UpdatePrompt.init();
     initUpdateStatusUi();
     const save = SaveManager.load();
     const slot = SaveManager.getCurrentSlot();

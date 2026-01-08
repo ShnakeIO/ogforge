@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('ogforgeUpdater', {
   enable: () => ipcRenderer.invoke('ogforge-updater:enable'),
   check: () => ipcRenderer.invoke('ogforge-updater:check'),
   install: () => ipcRenderer.invoke('ogforge-updater:install'),
+  download: () => ipcRenderer.invoke('ogforge-updater:download'),
   onStatus: (cb) => {
     if (typeof cb !== 'function') return () => {};
     const handler = (_event, payload) => cb(payload);
