@@ -1,11 +1,11 @@
-version: 1.0.8
+version: 1.0.9
 files:
-  - url: OGforge-1.0.8-arm64-mac.zip
-    sha512: aQyqpe4wGz7rfucx3Pwk+EzQ7OUHJbYRxnGKSFURhNgqxtu5zYjb9bycR9pP8/PRjFIAoJFrMz7gd8XPqGCmRw==
-    size: 95280250
-  - url: OGforge-1.0.8-arm64.dmg
-    sha512: 1i9+8t4Max0GyCnvMy5Rakl70iV522Stw5OboDAydOzIofkyYo7jvWBewql5RPCaK//hP5VIijNoWhsv9ug7sg==
-    size: 98702902
-path: OGforge-1.0.8-arm64-mac.zip
-sha512: aQyqpe4wGz7rfucx3Pwk+EzQ7OUHJbYRxnGKSFURhNgqxtu5zYjb9bycR9pP8/PRjFIAoJFrMz7gd8XPqGCmRw==
-releaseDate: '2026-01-08T18:59:30.284Z'
+  - url: OGforge-1.0.9-arm64-mac.zip
+    sha512: +aF2iamjdBd3RtJmHAy2auZP0hv8SD3XItF5P8spyrJWeGMX7kUOy6LT40F3+QltPIY6Yc13YL0WZ8bTuRzFTQ==
+    size: 95280260
+  - url: OGforge-1.0.9-arm64.dmg
+    sha512: jlFnNaG8YTB5+OZoUzce56wqmwrPgc9aW7F0ABhfBi8/Mjt7biOBdggQXX9GXwOhEQc8PeVFf492cr1ta4qIrA==
+    size: 98703619
+path: OGforge-1.0.9-arm64-mac.zip
+sha512: +aF2iamjdBd3RtJmHAy2auZP0hv8SD3XItF5P8spyrJWeGMX7kUOy6LT40F3+QltPIY6Yc13YL0WZ8bTuRzFTQ==
+releaseDate: '2026-01-08T19:05:26.938Z'
