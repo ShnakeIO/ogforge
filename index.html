@@ -738,8 +738,8 @@
                 <div class="stat-row money"><span class="stat-icon" style="background:#50fa7b"></span> $<span id="ui-money">0</span></div>
                 <div class="stat-row" style="margin-bottom:0;color:rgba(238,240,255,.78)"><span class="stat-icon" style="background:#7c5cff"></span> Depth <span id="ui-depth">0</span></div>
                 <div class="stat-row" style="margin-bottom:0;color:rgba(238,240,255,.78)"><span class="stat-icon" style="background:#ffb020"></span> Drills <span id="ui-drills">0</span></div>
-                <button class="update-btn" id="btn-check-update" type="button">Check for Update</button>
                 <button class="tp-btn" id="btn-return-base" type="button">Return to Base</button>
+                <button class="update-btn" id="btn-check-update" type="button">Check for Update</button>
             </div>
             <div class="xp-box">
                 <div class="xp-label">
@@ -4402,7 +4402,6 @@ function bootGame() {
     }
     const updateBtn = document.getElementById('btn-check-update');
     if (updateBtn) {
-        if (!updaterAvailable()) updateBtn.style.display = 'none';
         updateBtn.addEventListener('click', () => requestUpdateCheck());
     }
     startAutoUpdates();
