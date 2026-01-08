@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
-import { autoUpdater } from 'electron-updater';
+import updaterPkg from 'electron-updater';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -10,6 +10,7 @@ const appRoot = path.join(__dirname, '..');
 let mainWindow = null;
 let updaterEnabled = false;
 let updaterReady = false;
+const { autoUpdater } = updaterPkg;
 
 function ensureDirSync(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
