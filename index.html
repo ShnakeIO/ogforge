@@ -1241,7 +1241,7 @@ function startAutoUpdates() {
 
 function requestUpdateCheck() {
     if (!updaterAvailable()) {
-        showToast('Updates are available in the desktop app.');
+        showToast('Update check unavailable.');
         return;
     }
     initUpdateStatusUi();

@@ -1,11 +1,11 @@
-version: 1.0.14
+version: 1.0.15
 files:
-  - url: OGforge-1.0.14-arm64-mac.zip
-    sha512: +NEQh6MpqSLhQIuyP6eQTOy9D/ufarJxGLplTMPN0b5Cs1AQ+1Gz2QwCDiNMIdDd01Fuy6ytp1QYG8hndI4Ylg==
-    size: 95280297
-  - url: OGforge-1.0.14-arm64.dmg
-    sha512: aoX2Aj3vJagr00Dn94d+BDbbeN45hyd8wbbdH2n0bszS+i3MSBIemHcl27Mxn3VZGKiqdOtJRkyGL3CX03gMRQ==
-    size: 98703848
-path: OGforge-1.0.14-arm64-mac.zip
-sha512: +NEQh6MpqSLhQIuyP6eQTOy9D/ufarJxGLplTMPN0b5Cs1AQ+1Gz2QwCDiNMIdDd01Fuy6ytp1QYG8hndI4Ylg==
-releaseDate: '2026-01-08T22:28:35.025Z'
+  - url: OGforge-1.0.15-arm64-mac.zip
+    sha512: KZLFg5rwTo6/M4jocaAV1dh2GfojlpzQ9oNN0AXBLHYgHZVs8KUOKr754OKaw0cQECao4iO7ALc9l3azhIM9hQ==
+    size: 95280288
+  - url: OGforge-1.0.15-arm64.dmg
+    sha512: ldyMIPK+CfJVsWoy5Bt4DGBAU8Q5c6GizP5c5DU5v2F2VG3XI4XyB+iRl8uMO3KWi3QNTXBJzE6hqRmjdVwTfA==
+    size: 98703738
+path: OGforge-1.0.15-arm64-mac.zip
+sha512: KZLFg5rwTo6/M4jocaAV1dh2GfojlpzQ9oNN0AXBLHYgHZVs8KUOKr754OKaw0cQECao4iO7ALc9l3azhIM9hQ==
+releaseDate: '2026-01-08T22:36:08.461Z'
