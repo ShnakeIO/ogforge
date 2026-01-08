@@ -564,6 +564,53 @@
             text-shadow: 0 6px 20px rgba(0,0,0,.8);
         }
 
+        #arena-health{
+            position: absolute;
+            left: 50%;
+            bottom: 20px;
+            transform: translateX(-50%);
+            width: min(520px, 92vw);
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,120,140,.35);
+            background: linear-gradient(180deg, rgba(30,10,14,.92), rgba(12,8,10,.9));
+            box-shadow: 0 16px 40px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.08);
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        #arena-health[hidden]{ display:none; }
+        .arena-health-label{
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            color: rgba(255,200,210,.9);
+        }
+        .arena-health-track{
+            position: relative;
+            flex: 1;
+            height: 10px;
+            border-radius: 999px;
+            background: rgba(0,0,0,.55);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+            overflow: hidden;
+        }
+        .arena-health-fill{
+            height: 100%;
+            width: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, rgba(255,102,130,.95), rgba(255,60,90,.95));
+            box-shadow: 0 0 16px rgba(255,80,120,.6);
+            transition: width .2s ease-out;
+        }
+        .arena-health-value{
+            font-size: 11px;
+            font-weight: 800;
+            color: rgba(255,220,230,.8);
+        }
+
         @media (max-width: 520px) {
             .hud-top { padding: 10px; }
             .stats-box { min-width: 0; padding: 8px 10px; border-radius: 12px; }
@@ -619,6 +666,13 @@
             </div>
         </div>
         <div id="message-area" onclick="interactAction()">Press E to interact</div>
+        <div id="arena-health" hidden>
+            <div class="arena-health-label">Health</div>
+            <div class="arena-health-track">
+                <div class="arena-health-fill" id="arena-health-fill"></div>
+            </div>
+            <div class="arena-health-value"><span id="arena-health-value">0</span></div>
+        </div>
     </div>
 
     <!-- Forge / Shop Menu -->
@@ -816,6 +870,9 @@ const T_ONYX = 19;
 const T_MYTHRIL = 20;
 const T_CELESTITE = 21;
 const T_VOIDSTONE = 22;
+const T_PORTAL = 23;
+const T_BARRIER = 24;
+const T_ARENA_CHEST = 25;
 const T_BEDROCK = 9;
 const T_FORGE = 10;
 const T_CACHE = 12;
@@ -866,7 +923,10 @@ const COLORS = {
     [T_WALL]: '#232336',
     [T_BEDROCK]: '#0a0a10',
     [T_FORGE]: '#ff4d6d',
-    [T_CACHE]: '#ffd56a'
+    [T_CACHE]: '#ffd56a',
+    [T_PORTAL]: '#8b5cff',
+    [T_BARRIER]: '#b07dff',
+    [T_ARENA_CHEST]: '#ffd56a'
 };
 for (const ore of ORES) {
     COLORS[ore.tile] = ore.color;
@@ -1553,6 +1613,93 @@ class TileArt {
                 oreBuild(ore.tile, ore.overlay, ore.kind);
             }
 
+            this._build(T_PORTAL, v, (ctx, seed) => {
+                const g = ctx.createRadialGradient(
+                    this.tileSize / 2,
+                    this.tileSize / 2,
+                    4,
+                    this.tileSize / 2,
+                    this.tileSize / 2,
+                    this.tileSize * 0.7
+                );
+                g.addColorStop(0, 'rgba(20,8,30,0.95)');
+                g.addColorStop(0.45, 'rgba(35,12,50,0.98)');
+                g.addColorStop(1, 'rgba(8,6,12,1)');
+                ctx.fillStyle = g;
+                roundRectPath(ctx, 0.5, 0.5, this.tileSize - 1, this.tileSize - 1, 10);
+                ctx.fill();
+
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                ctx.shadowColor = 'rgba(155,100,255,0.85)';
+                ctx.shadowBlur = 18;
+                ctx.strokeStyle = 'rgba(170,120,255,0.85)';
+                ctx.lineWidth = 2.5;
+                const ring = 8 + seeded01(seed ^ 0xa11f) * 6;
+                ctx.beginPath();
+                ctx.arc(this.tileSize / 2, this.tileSize / 2, ring, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 0.7;
+                ctx.strokeStyle = 'rgba(90,40,160,0.75)';
+                ctx.beginPath();
+                ctx.arc(this.tileSize / 2, this.tileSize / 2, ring + 6, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            });
+
+            this._build(T_BARRIER, v, (ctx, seed) => {
+                this._stoneBase(ctx, seed, '#120a1d', '#0b0714');
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                ctx.shadowColor = 'rgba(176,125,255,0.85)';
+                ctx.shadowBlur = 14;
+                ctx.strokeStyle = 'rgba(176,125,255,0.9)';
+                ctx.lineWidth = 2.4;
+                roundRectPath(ctx, 6, 6, this.tileSize - 12, this.tileSize - 12, 8);
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 0.5;
+                ctx.strokeStyle = 'rgba(255,220,255,0.35)';
+                roundRectPath(ctx, 10, 10, this.tileSize - 20, this.tileSize - 20, 6);
+                ctx.stroke();
+                ctx.restore();
+            });
+
+            this._build(T_ARENA_CHEST, v, (ctx, seed) => {
+                this._stoneBase(ctx, seed, ART.floor0, ART.floor1);
+
+                ctx.save();
+                ctx.shadowColor = 'rgba(176,125,255,0.65)';
+                ctx.shadowBlur = 16;
+                const x = 10;
+                const y = 18;
+                const w = this.tileSize - 20;
+                const h = this.tileSize - 26;
+                const g = ctx.createLinearGradient(0, y, 0, y + h);
+                g.addColorStop(0, 'rgba(255,213,106,0.95)');
+                g.addColorStop(1, 'rgba(176,125,255,0.72)');
+                ctx.fillStyle = g;
+                roundRectPath(ctx, x, y, w, h, 10);
+                ctx.fill();
+
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 0.35;
+                ctx.fillStyle = '#000';
+                roundRectPath(ctx, x + 1, y + 10, w - 2, 2, 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+
+                ctx.fillStyle = 'rgba(20,20,28,0.95)';
+                roundRectPath(ctx, this.tileSize / 2 - 4, y + 12, 8, 10, 3);
+                ctx.fill();
+                ctx.fillStyle = 'rgba(255,255,255,0.85)';
+                ctx.beginPath();
+                ctx.arc(this.tileSize / 2, y + 16, 1.4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+
             this._build(T_CACHE, v, (ctx, seed) => {
                 this._stoneBase(ctx, seed, ART.floor0, ART.floor1);
 
@@ -1736,6 +1883,81 @@ class Shockwave {
     }
 }
 
+class Guard {
+    constructor(x, y, tier = 1) {
+        this.x = x;
+        this.y = y;
+        this.tier = Math.max(1, Math.floor(tier));
+        this.radius = 9;
+        this.maxHealth = 30 + this.tier * 18;
+        this.health = this.maxHealth;
+        this.speed = 1.05 + this.tier * 0.08;
+        this.damage = 6 + this.tier * 3;
+        this.cooldown = 0;
+    }
+
+    update(game) {
+        if (this.cooldown > 0) this.cooldown--;
+        const dx = game.player.x - this.x;
+        const dy = game.player.y - this.y;
+        const dist = Math.hypot(dx, dy) || 1;
+        const stepX = (dx / dist) * this.speed;
+        const stepY = (dy / dist) * this.speed;
+
+        const nextX = this.x + stepX;
+        if (!game.map.isSolidAt(nextX, this.y, this.radius - 2)) {
+            this.x = nextX;
+        }
+        const nextY = this.y + stepY;
+        if (!game.map.isSolidAt(this.x, nextY, this.radius - 2)) {
+            this.y = nextY;
+        }
+
+        if (dist < 18 && this.cooldown <= 0) {
+            game.damagePlayer(this.damage);
+            this.cooldown = 28;
+        }
+    }
+
+    takeDamage(amount) {
+        const dmg = Math.max(1, Math.floor(amount || 0));
+        this.health -= dmg;
+        return dmg;
+    }
+
+    draw(ctx, camX, camY, time) {
+        const px = this.x - camX;
+        const py = this.y - camY;
+        const t = time || 0;
+        const pulse = 0.5 + 0.5 * Math.sin(t * 0.12 + this.tier);
+
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.shadowColor = 'rgba(176,125,255,0.65)';
+        ctx.shadowBlur = 14 + pulse * 6;
+        ctx.fillStyle = 'rgba(24,16,32,0.95)';
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = 'rgba(176,125,255,0.75)';
+        ctx.beginPath();
+        ctx.arc(-3, -3, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 1;
+        ctx.restore();
+    }
+}
+
 class DrillRig {
     constructor(tx, ty) {
         this.tx = tx;
@@ -1755,7 +1977,7 @@ class DrillRig {
                 const tx = this.tx + dx;
                 const ty = this.ty + dy;
                 const t = map.getTile(tx, ty);
-                if (t === T_FLOOR || t === T_BEDROCK || t === T_FORGE || t === T_CACHE) continue;
+                if (t === T_FLOOR || t === T_BEDROCK || t === T_FORGE || t === T_CACHE || t === T_PORTAL || t === T_BARRIER || t === T_ARENA_CHEST) continue;
                 const hp = map.getHp(tx, ty);
                 if (hp <= 0) continue;
                 const d2 = dx * dx + dy * dy;
@@ -1773,7 +1995,7 @@ class DrillRig {
 
         const { tx, ty } = this.target;
         const tile = game.map.getTile(tx, ty);
-        if (tile === T_FLOOR || tile === T_BEDROCK || tile === T_FORGE || tile === T_CACHE) {
+        if (tile === T_FLOOR || tile === T_BEDROCK || tile === T_FORGE || tile === T_CACHE || tile === T_PORTAL || tile === T_BARRIER || tile === T_ARENA_CHEST) {
             this.target = null;
             return;
         }
@@ -1992,6 +2214,8 @@ class Player {
         this.inventory = makeEmptyInventory();
         this.level = 1;
         this.xp = 0;
+        this.maxHealth = 100;
+        this.health = this.maxHealth;
         
         // Upgrades
         this.miningPower = 2; // Damage per tick
@@ -2221,9 +2445,42 @@ class InfiniteMap {
         return T_FLOOR;
     }
 
+    portalInfoAt(tx, ty) {
+        const spacing = 88;
+        const cellX = Math.floor(tx / spacing);
+        const cellY = Math.floor(ty / spacing);
+        if (Math.abs(cellX) <= 1 && Math.abs(cellY) <= 1) return null;
+
+        const seed = this._h(cellX, cellY, 0x4f1d);
+        const chance = seeded01(seed ^ 0x7a11);
+        if (chance > 0.004) return null;
+
+        const offsetX = 6 + Math.floor(seeded01(seed ^ 0x9baf) * (spacing - 18));
+        const offsetY = 6 + Math.floor(seeded01(seed ^ 0x5c91) * (spacing - 18));
+        const originX = cellX * spacing + offsetX;
+        const originY = cellY * spacing + offsetY;
+
+        if (Math.hypot(originX, originY) < 12) return null;
+        if (tx < originX || tx >= originX + 4 || ty < originY || ty >= originY + 4) return null;
+
+        const depth = Math.hypot(originX, originY);
+        const difficulty = 1 + Math.floor(clamp01((depth - 30) / 220) * 4);
+        const arenaX = cellX * 240 + 6000 + Math.floor(seeded01(seed ^ 0x33a1) * 40);
+        const arenaY = cellY * 240 - 6000 + Math.floor(seeded01(seed ^ 0x55b2) * 40);
+
+        return { originX, originY, cellX, cellY, arenaX, arenaY, difficulty, seed };
+    }
+
+    getPortalInfo(tx, ty) {
+        return this.portalInfoAt(tx, ty);
+    }
+
     baseTileAt(tx, ty) {
         if (tx === this.forgeTile.x && ty === this.forgeTile.y) return T_FORGE;
         if (this.inSpawnRoom(tx, ty)) return T_FLOOR;
+
+        const portal = this.portalInfoAt(tx, ty);
+        if (portal) return T_PORTAL;
 
         const structure = this.structureTileAt(tx, ty);
         if (structure !== null) return structure;
@@ -2296,7 +2553,7 @@ class InfiniteMap {
             const tx = Math.floor(x / TILE_SIZE);
             const ty = Math.floor(y / TILE_SIZE);
             const t = this.getTile(tx, ty);
-            return t !== T_FLOOR && t !== T_FORGE && t !== T_CACHE;
+            return t !== T_FLOOR && t !== T_FORGE && t !== T_CACHE && t !== T_PORTAL && t !== T_ARENA_CHEST;
         };
 
         return checkTile(px - radius + 2, py) ||
@@ -2350,6 +2607,14 @@ class Game {
         this.isForgeOpen = false;
         this.isMinesMenuOpen = false;
         this._autosaveTick = 0;
+        this.inArena = false;
+        this.currentPortal = null;
+        this.arenaGuards = [];
+        this.arenaChestOpened = false;
+        this.arenaBarrierDown = false;
+        this.arenaRoom = null;
+        this.portalCooldown = 0;
+        this.attackTick = 0;
 
         this.saveSlotId = null;
         try {
@@ -2418,6 +2683,11 @@ class Game {
     }
     
     interact() {
+        if (this.inArena) {
+            const chest = this.findNearbyArenaChest();
+            if (chest) this.openArenaChest(chest.tx, chest.ty);
+            return;
+        }
         const cache = this.findNearbyCache();
         if (cache) {
             this.openCache(cache.tx, cache.ty);
@@ -2435,6 +2705,7 @@ class Game {
     }
     
     openForge() {
+        if (this.inArena) return;
         this.isForgeOpen = true;
         document.getElementById('forge-menu').style.display = 'block';
         if (window.ForgeUi) ForgeUi.onOpen();
@@ -2541,6 +2812,7 @@ class Game {
 
     togglePlaceDrill() {
         if (!gameRunning) return;
+        if (this.inArena) return;
         if (this.isForgeOpen) {
             this.closeForge();
         }
@@ -2710,6 +2982,290 @@ class Game {
         if (xpNextEl) xpNextEl.textContent = next;
         if (xpFill) xpFill.style.width = `${(pct * 100).toFixed(1)}%`;
     }
+
+    getArenaRoom(info) {
+        const w = 18;
+        const h = 14;
+        const x = Math.floor(info.arenaX);
+        const y = Math.floor(info.arenaY);
+        const cx = x + Math.floor(w / 2);
+        const cy = y + Math.floor(h / 2);
+        const entryX = x + 1;
+        const entryY = cy;
+        const barrierTiles = [];
+        for (let by = cy - 2; by <= cy + 2; by++) {
+            for (let bx = cx - 2; bx <= cx + 2; bx++) {
+                if (bx === cx - 2 || bx === cx + 2 || by === cy - 2 || by === cy + 2) {
+                    barrierTiles.push({ tx: bx, ty: by });
+                }
+            }
+        }
+        return { x, y, w, h, cx, cy, entryX, entryY, barrierTiles };
+    }
+
+    buildArenaRoom(info) {
+        const room = this.getArenaRoom(info);
+        this.arenaRoom = room;
+        for (let y = 0; y < room.h; y++) {
+            for (let x = 0; x < room.w; x++) {
+                const tx = room.x + x;
+                const ty = room.y + y;
+                const edge = x === 0 || y === 0 || x === room.w - 1 || y === room.h - 1;
+                this.map.setTile(tx, ty, edge ? T_BEDROCK : T_FLOOR);
+            }
+        }
+        this.map.setTile(room.cx, room.cy, T_ARENA_CHEST);
+        for (const b of room.barrierTiles) {
+            this.map.setTile(b.tx, b.ty, T_BARRIER);
+        }
+    }
+
+    spawnArenaGuards(info) {
+        const guards = [];
+        const room = this.arenaRoom;
+        if (!room) return guards;
+        const count = 4 + info.difficulty * 2;
+        for (let i = 0; i < count; i++) {
+            const seed = (info.seed + i * 7919) >>> 0;
+            const edge = i % 4;
+            let tx = room.x + 1;
+            let ty = room.y + 1;
+            if (edge === 0) {
+                tx = room.x + 1;
+                ty = room.y + 2 + Math.floor(seeded01(seed) * (room.h - 4));
+            } else if (edge === 1) {
+                tx = room.x + room.w - 2;
+                ty = room.y + 2 + Math.floor(seeded01(seed ^ 0x55aa) * (room.h - 4));
+            } else if (edge === 2) {
+                tx = room.x + 2 + Math.floor(seeded01(seed ^ 0xa551) * (room.w - 4));
+                ty = room.y + 1;
+            } else {
+                tx = room.x + 2 + Math.floor(seeded01(seed ^ 0xface) * (room.w - 4));
+                ty = room.y + room.h - 2;
+            }
+            const gx = tx * TILE_SIZE + TILE_SIZE / 2;
+            const gy = ty * TILE_SIZE + TILE_SIZE / 2;
+            guards.push(new Guard(gx, gy, info.difficulty));
+        }
+        return guards;
+    }
+
+    enterPortal(info) {
+        if (!info || this.inArena) return;
+        this.inArena = true;
+        this.currentPortal = info;
+        this.arenaChestOpened = false;
+        this.arenaBarrierDown = false;
+        this.placeDrillMode = false;
+        this.attackTick = 0;
+        this.portalCooldown = 40;
+        this.buildArenaRoom(info);
+        this.arenaGuards = this.spawnArenaGuards(info);
+
+        const room = this.arenaRoom;
+        if (room) {
+            this.player.x = room.entryX * TILE_SIZE + TILE_SIZE / 2;
+            this.player.y = room.entryY * TILE_SIZE + TILE_SIZE / 2;
+        }
+        this.player.health = this.player.maxHealth;
+        this.updateHealthUi();
+        this.setArenaUi(true);
+        showToast('A portal drags you into the void arena.');
+    }
+
+    exitArena(died) {
+        if (!this.inArena) return;
+        if (died) {
+            this.closePortal(this.currentPortal);
+            showToast('You fell. The portal collapsed.');
+        }
+        this.inArena = false;
+        this.currentPortal = null;
+        this.arenaGuards = [];
+        this.arenaRoom = null;
+        this.arenaChestOpened = false;
+        this.arenaBarrierDown = false;
+        this.player.health = this.player.maxHealth;
+        this.setArenaUi(false);
+        this.portalCooldown = 60;
+        this.attackTick = 0;
+
+        const spawnX = this.map.spawnTile.x * TILE_SIZE + TILE_SIZE / 2;
+        const spawnY = this.map.spawnTile.y * TILE_SIZE + TILE_SIZE / 2;
+        this.player.x = spawnX;
+        this.player.y = spawnY;
+        this.saveProgress();
+    }
+
+    closePortal(info) {
+        if (!info) return;
+        for (let y = 0; y < 4; y++) {
+            for (let x = 0; x < 4; x++) {
+                this.map.setTile(info.originX + x, info.originY + y, T_FLOOR);
+            }
+        }
+    }
+
+    damagePlayer(amount) {
+        if (!this.inArena) return;
+        const dmg = Math.max(1, Math.floor(amount || 0));
+        this.player.health = Math.max(0, this.player.health - dmg);
+        this.updateHealthUi();
+        this.addShake(2.5);
+        if (this.player.health <= 0) {
+            this.exitArena(true);
+        }
+    }
+
+    updateHealthUi() {
+        const wrap = document.getElementById('arena-health');
+        const fill = document.getElementById('arena-health-fill');
+        const val = document.getElementById('arena-health-value');
+        if (!wrap || !fill || !val) return;
+        if (!this.inArena) {
+            wrap.hidden = true;
+            return;
+        }
+        wrap.hidden = false;
+        const hp = Math.max(0, Math.floor(this.player.health));
+        const max = Math.max(1, Math.floor(this.player.maxHealth));
+        val.textContent = `${hp}/${max}`;
+        fill.style.width = `${Math.max(0, Math.min(1, hp / max)) * 100}%`;
+    }
+
+    setArenaUi(visible) {
+        const wrap = document.getElementById('arena-health');
+        if (wrap) wrap.hidden = !visible;
+    }
+
+    updateArena() {
+        if (!this.inArena) return;
+        for (let i = this.arenaGuards.length - 1; i >= 0; i--) {
+            const g = this.arenaGuards[i];
+            g.update(this);
+            if (g.health <= 0) {
+                this.spawnFloater(g.x - 8, g.y - 12, 'GUARD DOWN', 'rgba(255,180,220,0.9)');
+                this.arenaGuards.splice(i, 1);
+            }
+        }
+        if (this.arenaGuards.length === 0 && this.arenaRoom && !this.arenaBarrierDown) {
+            for (const b of this.arenaRoom.barrierTiles) {
+                this.map.setTile(b.tx, b.ty, T_FLOOR);
+            }
+            this.arenaBarrierDown = true;
+            showToast('The barrier fades. Claim the chest.');
+        }
+    }
+
+    tryAttackGuard(mx, my) {
+        if (!this.inArena || this.arenaGuards.length === 0) return false;
+        const reach = this.player.miningRange;
+        let target = null;
+        let best = Infinity;
+        for (const g of this.arenaGuards) {
+            const dx = g.x - mx;
+            const dy = g.y - my;
+            const dClick = Math.hypot(dx, dy);
+            const dPlayer = Math.hypot(g.x - this.player.x, g.y - this.player.y);
+            if (dClick > 36 || dPlayer > reach) continue;
+            if (dClick < best) {
+                best = dClick;
+                target = g;
+            }
+        }
+        if (!target) return false;
+
+        this.attackTick++;
+        if (this.attackTick % this.player.miningInterval !== 0) return true;
+        const crit = this.player.critChance > 0 && Math.random() < this.player.critChance;
+        const damage = crit ? this.player.miningPower * this.player.critMultiplier : this.player.miningPower;
+        const dealt = target.takeDamage(damage);
+        const c = 'rgba(176,125,255,0.95)';
+        this.effects.push(new Shockwave(target.x, target.y, c, 16, 12));
+        for (let i = 0; i < 4; i++) this.particles.push(new Particle(target.x, target.y, c, 2.6, 24));
+        this.spawnFloater(target.x - 10, target.y - 16, `-${dealt}`, '#ffd56a');
+        return true;
+    }
+
+    emitPortalParticles() {
+        if (this.inArena || this.time % 8 !== 0) return;
+        const ptx = Math.floor(this.player.x / TILE_SIZE);
+        const pty = Math.floor(this.player.y / TILE_SIZE);
+        for (let dy = -4; dy <= 4; dy++) {
+            for (let dx = -4; dx <= 4; dx++) {
+                const tx = ptx + dx;
+                const ty = pty + dy;
+                if (this.map.getTile(tx, ty) !== T_PORTAL) continue;
+                const x = tx * TILE_SIZE + TILE_SIZE / 2 + (Math.random() - 0.5) * 14;
+                const y = ty * TILE_SIZE + TILE_SIZE / 2 + (Math.random() - 0.5) * 14;
+                this.particles.push(new Particle(x, y, 'rgba(176,125,255,0.85)', 0.8, 40));
+            }
+        }
+    }
+
+    checkPortalEntry() {
+        if (this.inArena || this.portalCooldown > 0) return;
+        const tx = Math.floor(this.player.x / TILE_SIZE);
+        const ty = Math.floor(this.player.y / TILE_SIZE);
+        if (this.map.getTile(tx, ty) !== T_PORTAL) return;
+        const info = this.map.getPortalInfo(tx, ty);
+        if (info) this.enterPortal(info);
+    }
+
+    findNearbyArenaChest() {
+        if (!this.inArena || !this.arenaRoom) return null;
+        const ptx = Math.floor(this.player.x / TILE_SIZE);
+        const pty = Math.floor(this.player.y / TILE_SIZE);
+        for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+                const tx = ptx + dx;
+                const ty = pty + dy;
+                if (this.map.getTile(tx, ty) !== T_ARENA_CHEST) continue;
+                const cx = tx * TILE_SIZE + TILE_SIZE / 2;
+                const cy = ty * TILE_SIZE + TILE_SIZE / 2;
+                const dist = Math.hypot(this.player.x - cx, this.player.y - cy);
+                if (dist < 70) return { tx, ty, dist };
+            }
+        }
+        return null;
+    }
+
+    openArenaChest(tx, ty) {
+        if (!this.inArena || this.map.getTile(tx, ty) !== T_ARENA_CHEST) return;
+        if (this.arenaGuards.length > 0) {
+            showToast('The barrier holds until the guards fall.');
+            return;
+        }
+        if (this.arenaChestOpened) return;
+        this.arenaChestOpened = true;
+        this.arenaBarrierDown = true;
+        this.map.setTile(tx, ty, T_FLOOR);
+        this.effects.push(new Shockwave(tx * TILE_SIZE + TILE_SIZE / 2, ty * TILE_SIZE + TILE_SIZE / 2, COLORS[T_ARENA_CHEST], 52, 22));
+        for (let i = 0; i < 16; i++) this.particles.push(new Particle(tx * TILE_SIZE + TILE_SIZE / 2, ty * TILE_SIZE + TILE_SIZE / 2, 'rgba(176,125,255,0.9)', 3.8, 42));
+        this.addShake(5);
+        this.audio.playCacheOpen();
+
+        const diff = Math.max(1, this.currentPortal ? this.currentPortal.difficulty : 1);
+        const poolSize = Math.min(ORE_DIST_ORDER.length, 4 + diff * 3);
+        const pool = ORE_DIST_ORDER.slice(0, poolSize).map(k => ORE_BY_KEY[k]).filter(Boolean);
+        const picks = 3 + diff * 2 + (Math.random() < 0.4 ? 1 : 0);
+        const baseX = tx * TILE_SIZE + TILE_SIZE / 2;
+        const baseY = ty * TILE_SIZE + TILE_SIZE / 2;
+        for (let i = 0; i < picks; i++) {
+            const ore = pool[Math.floor(Math.random() * pool.length)];
+            const amount = 1 + (Math.random() < 0.25 ? 1 : 0);
+            this.player.inventory[ore.key] += amount;
+            this.spawnFloater(baseX - 20 + i * 8, baseY - 12 - i * 6, `+${amount} ${ore.name.toUpperCase()}`, ore.color);
+        }
+        const cash = Math.floor(600 * diff + Math.random() * 450 * diff);
+        this.player.money += cash;
+        this.spawnFloater(baseX - 14, baseY - 38, `+$${cash}`, '#32d583');
+        this.gainXp(120 * diff);
+        this.updateUi();
+
+        showToast('Chest claimed. Returning to spawn.');
+        this.exitArena(false);
+    }
     
     update() {
         if (this.isForgeOpen || this.isMinesMenuOpen) return;
@@ -2717,6 +3273,7 @@ class Game {
         this.player.update(this.input, this.map);
         this.camera.follow(this.player);
         this.time += 1;
+        if (this.portalCooldown > 0) this.portalCooldown--;
 
         this._updateShake();
         this.renderCamX = this.camera.x + this.shakeX;
@@ -2739,6 +3296,12 @@ class Game {
             this.floaters[i].update();
             if (this.floaters[i].life <= 0) this.floaters.splice(i, 1);
         }
+
+        if (this.inArena) this.updateArena();
+        else {
+            this.emitPortalParticles();
+            this.checkPortalEntry();
+        }
         
         // Mining Logic
         this.hoveredTile = null;
@@ -2758,11 +3321,15 @@ class Game {
             const dist = Math.sqrt(dx*dx + dy*dy);
             
             if (dist < this.player.miningRange) { // Range
-                this.hoveredTile = { tx, ty };
-                if (this.placeDrillMode && mouseEdgeDown) {
-                    this.tryPlaceDrill(tx, ty);
-                } else if (!this.placeDrillMode) {
-                    this.mineTile(tx, ty, mx, my);
+                if (this.inArena) {
+                    this.tryAttackGuard(mx, my);
+                } else {
+                    this.hoveredTile = { tx, ty };
+                    if (this.placeDrillMode && mouseEdgeDown) {
+                        this.tryPlaceDrill(tx, ty);
+                    } else if (!this.placeDrillMode) {
+                        this.mineTile(tx, ty, mx, my);
+                    }
                 }
             }
         }
@@ -2771,27 +3338,48 @@ class Game {
         for (const d of this.drills) d.update(this);
         
         // Forge Interaction Hint
-        const forgeX = (this.map.forgeTile.x) * TILE_SIZE + TILE_SIZE/2;
-        const forgeY = (this.map.forgeTile.y) * TILE_SIZE + TILE_SIZE/2;
-        const distToForge = Math.sqrt((this.player.x - forgeX)**2 + (this.player.y - forgeY)**2);
         const msgArea = document.getElementById('message-area');
-        const nearbyCache = this.findNearbyCache();
-        if (this.placeDrillMode) {
-            msgArea.textContent = `Place drill: click wall/ore (${this.player.drillRigs} left)`;
-            msgArea.style.opacity = 1;
-        } else if (nearbyCache) {
-            msgArea.textContent = 'Tap or press E to open cache';
-            msgArea.style.opacity = 1;
-        } else if (distToForge < 100) {
-            msgArea.textContent = 'Tap or press E to interact';
-            msgArea.style.opacity = 1;
+        if (this.inArena) {
+            const chest = this.findNearbyArenaChest();
+            if (this.arenaGuards.length > 0) {
+                msgArea.textContent = `Defeat the guards (${this.arenaGuards.length})`;
+                msgArea.style.opacity = 1;
+            } else if (chest) {
+                msgArea.textContent = 'Tap or press E to open the chest';
+                msgArea.style.opacity = 1;
+            } else {
+                msgArea.textContent = 'Claim the void chest';
+                msgArea.style.opacity = 0.8;
+            }
         } else {
-            msgArea.style.opacity = 0;
+            const forgeX = (this.map.forgeTile.x) * TILE_SIZE + TILE_SIZE/2;
+            const forgeY = (this.map.forgeTile.y) * TILE_SIZE + TILE_SIZE/2;
+            const distToForge = Math.sqrt((this.player.x - forgeX)**2 + (this.player.y - forgeY)**2);
+            const nearbyCache = this.findNearbyCache();
+            if (this.placeDrillMode) {
+                msgArea.textContent = `Place drill: click wall/ore (${this.player.drillRigs} left)`;
+                msgArea.style.opacity = 1;
+            } else if (nearbyCache) {
+                msgArea.textContent = 'Tap or press E to open cache';
+                msgArea.style.opacity = 1;
+            } else if (distToForge < 100) {
+                msgArea.textContent = 'Tap or press E to interact';
+                msgArea.style.opacity = 1;
+            } else {
+                msgArea.style.opacity = 0;
+            }
         }
 
         if (this.uiDepth && this.time % 10 === 0) this.uiDepth.innerText = `${this.getDepth()}m`;
 
-        this.audio.setForgeHum(distToForge < 160);
+        if (!this.inArena) {
+            const forgeX = (this.map.forgeTile.x) * TILE_SIZE + TILE_SIZE/2;
+            const forgeY = (this.map.forgeTile.y) * TILE_SIZE + TILE_SIZE/2;
+            const distToForge = Math.sqrt((this.player.x - forgeX)**2 + (this.player.y - forgeY)**2);
+            this.audio.setForgeHum(distToForge < 160);
+        } else {
+            this.audio.setForgeHum(false);
+        }
 
         this._autosaveTick++;
         if (this._autosaveTick % 120 === 0) this.saveProgress(); // ~ every 2s at 60fps
@@ -2800,7 +3388,7 @@ class Game {
     tryPlaceDrill(tx, ty) {
         if (this.player.drillRigs <= 0) return false;
         const tile = this.map.getTile(tx, ty);
-        if (tile === T_FLOOR || tile === T_BEDROCK || tile === T_FORGE || tile === T_CACHE) return false;
+        if (tile === T_FLOOR || tile === T_BEDROCK || tile === T_FORGE || tile === T_CACHE || tile === T_PORTAL || tile === T_BARRIER || tile === T_ARENA_CHEST) return false;
         this.player.drillRigs--;
         this.placeDrillMode = false;
         this.drills.push(new DrillRig(tx, ty));
@@ -2906,7 +3494,7 @@ class Game {
     mineTile(tx, ty, worldX, worldY) {
         const type = this.map.getTile(tx, ty);
         
-        if (type !== T_FLOOR && type !== T_BEDROCK && type !== T_FORGE && type !== T_CACHE) {
+        if (type !== T_FLOOR && type !== T_BEDROCK && type !== T_FORGE && type !== T_CACHE && type !== T_PORTAL && type !== T_BARRIER && type !== T_ARENA_CHEST) {
             this.miningTick++;
             if (this.miningTick % this.player.miningInterval === 0) { // Visual shake or particle trigger frequency
                 // Particles
@@ -3058,7 +3646,15 @@ class Game {
                 levels: this.player.levels
             },
             map: mapState,
-            drills: this.drills.map(d => ({ tx: d.tx, ty: d.ty }))
+            drills: this.drills.map(d => ({ tx: d.tx, ty: d.ty })),
+            arena: {
+                active: this.inArena,
+                portal: this.currentPortal,
+                chestOpened: this.arenaChestOpened,
+                barrierDown: this.arenaBarrierDown,
+                guards: this.arenaGuards.map(g => ({ x: g.x, y: g.y, health: g.health, tier: g.tier })),
+                health: this.player.health
+            }
         };
     }
 
@@ -3104,6 +3700,35 @@ class Game {
             this.drills = state.drills
                 .filter(d => Number.isFinite(d.tx) && Number.isFinite(d.ty))
                 .map(d => new DrillRig(d.tx, d.ty));
+        }
+        const arena = state.arena;
+        if (arena && arena.active && arena.portal) {
+            this.inArena = true;
+            this.currentPortal = arena.portal;
+            this.arenaChestOpened = Boolean(arena.chestOpened);
+            this.arenaBarrierDown = Boolean(arena.barrierDown);
+            this.arenaRoom = this.getArenaRoom(this.currentPortal);
+            this.arenaGuards = Array.isArray(arena.guards)
+                ? arena.guards
+                    .filter(g => Number.isFinite(g.x) && Number.isFinite(g.y))
+                    .map(g => {
+                        const guard = new Guard(g.x, g.y, g.tier || (this.currentPortal?.difficulty || 1));
+                        guard.health = Number.isFinite(g.health) ? g.health : guard.maxHealth;
+                        return guard;
+                    })
+                : [];
+            this.player.health = Number.isFinite(arena.health) ? arena.health : this.player.maxHealth;
+            this.setArenaUi(true);
+            this.updateHealthUi();
+        } else {
+            this.inArena = false;
+            this.currentPortal = null;
+            this.arenaGuards = [];
+            this.arenaRoom = null;
+            this.arenaChestOpened = false;
+            this.arenaBarrierDown = false;
+            this.player.health = this.player.maxHealth;
+            this.setArenaUi(false);
         }
         this.updateUi();
         return true;
@@ -3198,12 +3823,27 @@ class Game {
             }
         }
 
+        if (this.inArena && this.arenaRoom) {
+            const room = this.arenaRoom;
+            const gx = (room.cx * TILE_SIZE + TILE_SIZE / 2) - camX;
+            const gy = (room.cy * TILE_SIZE + TILE_SIZE / 2) - camY;
+            const glow = ctx.createRadialGradient(gx, gy, 40, gx, gy, 360);
+            glow.addColorStop(0, 'rgba(176,125,255,0.35)');
+            glow.addColorStop(0.6, 'rgba(80,40,120,0.22)');
+            glow.addColorStop(1, 'rgba(10,8,18,0)');
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.fillStyle = glow;
+            ctx.fillRect(0, 0, this.viewportWidth, this.viewportHeight);
+            ctx.restore();
+        }
+
         // Mining highlight (visual only)
         if (this.hoveredTile) {
             const { tx, ty } = this.hoveredTile;
             {
                 const tile = this.map.getTile(tx, ty);
-                if (tile !== T_FLOOR && tile !== T_BEDROCK && tile !== T_FORGE && tile !== T_CACHE) {
+                if (tile !== T_FLOOR && tile !== T_BEDROCK && tile !== T_FORGE && tile !== T_CACHE && tile !== T_PORTAL && tile !== T_BARRIER && tile !== T_ARENA_CHEST) {
                     const x0 = tx * TILE_SIZE - camX;
                     const y0 = ty * TILE_SIZE - camY;
                     const maxHp = TILE_HP[tile] || 1;
@@ -3231,6 +3871,10 @@ class Game {
                 }
             }
         }
+
+        if (this.inArena) {
+            for (const g of this.arenaGuards) g.draw(ctx, camX, camY, this.time);
+        }
         
         // Draw Player
         this.player.draw(ctx, camX, camY, this.time);
@@ -3255,7 +3899,8 @@ class Game {
         const screenPy = this.player.y - camY;
         
         // Fill canvas with darkness
-        const gradient = ctx.createRadialGradient(screenPx, screenPy, 30, screenPx, screenPy, this.player.lightRadius);
+        const lightRadius = this.inArena ? Math.max(this.player.lightRadius, 320) : this.player.lightRadius;
+        const gradient = ctx.createRadialGradient(screenPx, screenPy, 30, screenPx, screenPy, lightRadius);
         gradient.addColorStop(0, 'rgba(0,0,0,0)');
         gradient.addColorStop(0.8, 'rgba(0,0,0,0.6)');
         gradient.addColorStop(1, 'rgba(0,0,0,0.98)'); // Very dark
@@ -3283,6 +3928,7 @@ class Game {
     }
 
     drawForgeCompass() {
+        if (this.inArena) return;
         const forgeX = (this.map.forgeTile.x) * TILE_SIZE + TILE_SIZE / 2;
         const forgeY = (this.map.forgeTile.y) * TILE_SIZE + TILE_SIZE / 2;
         const vx = forgeX - this.player.x;
