@@ -1222,6 +1222,14 @@ function initUpdateStatusUi() {
             showToast('Update ready. Restarting...');
             return;
         }
+        if (payload.state === 'needs_install') {
+            showToast(payload.message || 'Move OGforge to Applications to update.');
+            return;
+        }
+        if (payload.state === 'relaunch') {
+            showToast(payload.message || 'Restarting to enable updates...');
+            return;
+        }
         if (payload.state === 'error') {
             showToast('Update error. Try again later.');
         }

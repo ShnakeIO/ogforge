@@ -154,9 +154,29 @@ function initAutoUpdater() {
   });
 }
 
+function ensureMacInstallLocation() {
+  if (process.platform !== 'darwin') return true;
+  try {
+    if (app.isInApplicationsFolder()) return true;
+    const moved = app.moveToApplicationsFolder();
+    if (moved) {
+      sendUpdaterStatus({ state: 'relaunch', message: 'Moved to Applications. Restarting...' });
+      app.relaunch();
+      app.exit(0);
+      return false;
+    }
+    sendUpdaterStatus({ state: 'needs_install', message: 'Move OGforge to Applications to enable updates.' });
+    return false;
+  } catch (err) {
+    sendUpdaterStatus({ state: 'needs_install', message: err?.message || 'Move OGforge to Applications to enable updates.' });
+    return false;
+  }
+}
+
 function registerUpdaterIpc() {
   ipcMain.handle('ogforge-updater:enable', async () => {
     if (!app.isPackaged) return { ok: false, reason: 'not_packaged' };
+    if (!ensureMacInstallLocation()) return { ok: false, reason: 'needs_install' };
     updaterEnabled = true;
     initAutoUpdater();
     try {
@@ -171,6 +191,7 @@ function registerUpdaterIpc() {
   ipcMain.handle('ogforge-updater:check', async () => {
     if (!app.isPackaged) return { ok: false, reason: 'not_packaged' };
     if (!updaterEnabled) return { ok: false, reason: 'disabled' };
+    if (!ensureMacInstallLocation()) return { ok: false, reason: 'needs_install' };
     initAutoUpdater();
     try {
       await autoUpdater.checkForUpdates();
@@ -183,6 +204,7 @@ function registerUpdaterIpc() {
 
   ipcMain.handle('ogforge-updater:install', async () => {
     if (!app.isPackaged) return { ok: false, reason: 'not_packaged' };
+    if (!ensureMacInstallLocation()) return { ok: false, reason: 'needs_install' };
     try {
       autoUpdater.quitAndInstall();
       return { ok: true };
@@ -195,6 +217,7 @@ function registerUpdaterIpc() {
   ipcMain.handle('ogforge-updater:download', async () => {
     if (!app.isPackaged) return { ok: false, reason: 'not_packaged' };
     if (!updaterEnabled) return { ok: false, reason: 'disabled' };
+    if (!ensureMacInstallLocation()) return { ok: false, reason: 'needs_install' };
     initAutoUpdater();
     try {
       await autoUpdater.downloadUpdate();
