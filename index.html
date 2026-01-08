@@ -396,72 +396,6 @@
             text-shadow: 0 6px 20px rgba(0,0,0,.8);
         }
 
-        #update-modal{
-            position: fixed;
-            inset: 0;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 18px;
-            background: rgba(0,0,0,.62);
-            backdrop-filter: blur(10px);
-            pointer-events: auto;
-        }
-        #update-modal[hidden]{ display:none; }
-        .update-card{
-            width: min(520px, 100%);
-            border-radius: var(--radius-lg);
-            border: 1px solid rgba(255,255,255,.12);
-            background: linear-gradient(180deg, rgba(22,22,34,.94), rgba(14,14,22,.94));
-            box-shadow: 0 28px 80px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.08);
-            padding: 16px 16px 14px;
-        }
-        .update-title{
-            font-weight: 950;
-            font-size: 18px;
-            letter-spacing: .2px;
-            margin: 0 0 6px;
-        }
-        .update-sub{
-            color: rgba(238,240,255,.78);
-            font-weight: 800;
-            font-size: 13px;
-            margin: 0 0 10px;
-        }
-        .update-notes{
-            color: rgba(238,240,255,.72);
-            font-size: 13px;
-            line-height: 1.4;
-            white-space: pre-wrap;
-            border: 1px solid rgba(255,255,255,.10);
-            background: rgba(10,10,16,.35);
-            border-radius: 12px;
-            padding: 10px 12px;
-            margin: 0 0 12px;
-            max-height: min(40vh, 260px);
-            overflow: auto;
-        }
-        .update-actions{
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-        .u-btn{
-            appearance: none;
-            border: 1px solid rgba(255,255,255,.16);
-            border-radius: 12px;
-            background: rgba(255,255,255,.06);
-            color: rgba(238,240,255,.92);
-            padding: 10px 12px;
-            font-weight: 900;
-            cursor: pointer;
-        }
-        .u-btn.primary{
-            border-color: rgba(255,77,109,.55);
-            background: linear-gradient(180deg, rgba(255,77,109,.35), rgba(255,77,109,.18));
-        }
-
         @media (max-width: 520px) {
             .hud-top { padding: 10px; }
             .stats-box { min-width: 0; padding: 8px 10px; border-radius: 12px; }
@@ -477,18 +411,6 @@
 
     <canvas id="gameCanvas"></canvas>
     <div id="boot-toast">You have to play — tap/click to mine. Saves forever.</div>
-
-    <div id="update-modal" hidden>
-        <div class="update-card">
-            <div class="update-title">Update available</div>
-            <div id="update-sub" class="update-sub"></div>
-            <div id="update-notes" class="update-notes" hidden></div>
-            <div class="update-actions">
-                <button id="update-later" class="u-btn">Later</button>
-                <button id="update-download" class="u-btn primary">Download update</button>
-            </div>
-        </div>
-    </div>
 
     <div id="ui-layer">
         <div class="hud-top">
@@ -763,11 +685,8 @@ const OGFORGE_STORAGE = (() => {
     return localStorage;
 })();
 
-const UPDATE_DISMISS_KEY = 'ogforge-update-dismissed-v1';
-const UPDATE_CHECK_INTERVAL_MS = 10 * 60 * 1000;
 const TRADER_CODE_USED_KEY = 'ogforge-trader-code-hiilikefeet-used-v1';
 const REDEEMABLE_CODES_KEY = 'ogforge-redeemable-codes-v1';
-const UPDATE_ERROR_SHOWN_KEY = 'ogforge-update-error-shown-v1';
 
 function safeGet(key) {
     try { return OGFORGE_STORAGE.getItem(key); } catch { return null; }
@@ -808,96 +727,6 @@ function generateRedeemCode() {
     const part = (n) => Array.from({ length: n }, pick).join('');
     return `${part(4)}-${part(4)}`;
 }
-
-function setUpdateModalVisible(visible) {
-    const el = document.getElementById('update-modal');
-    if (!el) return;
-    if (visible) el.removeAttribute('hidden');
-    else el.setAttribute('hidden', '');
-}
-
-async function checkForAppUpdate({ silent = true } = {}) {
-    const api = window.ogforgeUpdate;
-    if (!api || typeof api.check !== 'function') {
-        if (!silent && safeGet(UPDATE_ERROR_SHOWN_KEY) !== '1') {
-            showToast('Update checks unavailable in this build.');
-            safeSet(UPDATE_ERROR_SHOWN_KEY, '1');
-        }
-        return null;
-    }
-
-    const result = await api.check();
-    if (!result || !result.ok) {
-        if (!silent && safeGet(UPDATE_ERROR_SHOWN_KEY) !== '1') {
-            const msg = (result && result.error) ? `Update check failed: ${result.error}` : 'Update check failed (offline?)';
-            showToast(msg);
-            safeSet(UPDATE_ERROR_SHOWN_KEY, '1');
-        }
-        return null;
-    }
-    if (!result.updateAvailable) return null;
-    if (!result.latestVersion) return null;
-
-    const dismissed = safeGet(UPDATE_DISMISS_KEY);
-    if (dismissed && String(dismissed) === String(result.latestVersion) && silent) return null;
-    return result;
-}
-
-function showUpdatePrompt(info) {
-    const modal = document.getElementById('update-modal');
-    const sub = document.getElementById('update-sub');
-    const notes = document.getElementById('update-notes');
-    const btnLater = document.getElementById('update-later');
-    const btnDownload = document.getElementById('update-download');
-    if (!modal || !sub || !btnLater || !btnDownload) return;
-
-    sub.textContent = `Installed v${info.currentVersion} → Latest v${info.latestVersion}`;
-    if (notes) {
-        if (info.notes) {
-            notes.textContent = String(info.notes);
-            notes.removeAttribute('hidden');
-        } else {
-            notes.textContent = '';
-            notes.setAttribute('hidden', '');
-        }
-    }
-
-    btnLater.style.display = info.required ? 'none' : '';
-
-    btnLater.onclick = () => {
-        safeSet(UPDATE_DISMISS_KEY, info.latestVersion);
-        setUpdateModalVisible(false);
-    };
-
-    btnDownload.onclick = async () => {
-        if (info.downloadUrl && window.ogforgeUpdate && typeof window.ogforgeUpdate.openDownload === 'function') {
-            await window.ogforgeUpdate.openDownload(info.downloadUrl);
-        }
-        safeSet(UPDATE_DISMISS_KEY, info.latestVersion);
-    };
-
-    setUpdateModalVisible(true);
-}
-
-function startUpdateChecks() {
-    let running = false;
-    const tick = async ({ silent } = {}) => {
-        if (running) return;
-        running = true;
-        try {
-            const info = await checkForAppUpdate({ silent });
-            if (info) showUpdatePrompt(info);
-        } catch {}
-        running = false;
-    };
-
-    tick({ silent: false });
-    setInterval(() => tick({ silent: true }), UPDATE_CHECK_INTERVAL_MS);
-}
-
-window.addEventListener('load', () => {
-    startUpdateChecks();
-});
 
 function clamp01(v) {
     return Math.max(0, Math.min(1, v));

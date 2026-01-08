@@ -6,12 +6,3 @@ contextBridge.exposeInMainWorld('ogforgeStore', {
   removeItem: (key) => ipcRenderer.sendSync('ogforge:removeItem', key),
   getSavesDir: () => ipcRenderer.sendSync('ogforge:getSavesDir')
 });
-
-contextBridge.exposeInMainWorld('ogforgeApp', {
-  getVersion: () => ipcRenderer.invoke('ogforge:app:getVersion')
-});
-
-contextBridge.exposeInMainWorld('ogforgeUpdate', {
-  check: () => ipcRenderer.invoke('ogforge:update:check'),
-  openDownload: (url) => ipcRenderer.invoke('ogforge:update:openDownload', url)
-});
