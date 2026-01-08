@@ -1239,7 +1239,7 @@ function initUpdateStatusUi() {
 function startAutoUpdates() {
     if (!updaterAvailable()) return;
     initUpdateStatusUi();
-    window.ogforgeUpdater.enable().catch(() => {});
+    window.ogforgeUpdater.enable({ prompt: false }).catch(() => {});
     if (!autoUpdateInterval) {
         autoUpdateInterval = window.setInterval(() => {
             window.ogforgeUpdater.check().catch(() => {});
@@ -1254,8 +1254,14 @@ function requestUpdateCheck() {
     }
     initUpdateStatusUi();
     showToast('Checking for updates...');
-    window.ogforgeUpdater.check().then((res) => {
-        if (res && res.ok === false) showToast('Update check failed.');
+    window.ogforgeUpdater.check({ prompt: true }).then((res) => {
+        if (res && res.ok === false) {
+            if (res.reason === 'needs_install') {
+                showToast('Move OGforge to Applications to enable updates.');
+                return;
+            }
+            showToast('Update check failed.');
+        }
     }).catch(() => {
         showToast('Update check failed.');
     });
@@ -1264,8 +1270,14 @@ function requestUpdateCheck() {
 function triggerUpdateDownload() {
     if (!updaterAvailable()) return;
     showToast('Downloading update...');
-    window.ogforgeUpdater.download().then((res) => {
-        if (res && res.ok === false) showToast('Update download failed.');
+    window.ogforgeUpdater.download({ prompt: true }).then((res) => {
+        if (res && res.ok === false) {
+            if (res.reason === 'needs_install') {
+                showToast('Move OGforge to Applications to enable updates.');
+                return;
+            }
+            showToast('Update download failed.');
+        }
     }).catch(() => {
         showToast('Update download failed.');
     });

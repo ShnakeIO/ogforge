@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, shell, dialog } from 'electron';
 import updaterPkg from 'electron-updater';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -173,10 +173,46 @@ function ensureMacInstallLocation() {
   }
 }
 
+async function ensureMacInstallLocation(options = {}) {
+  if (process.platform !== 'darwin') return true;
+  try {
+    if (app.isInApplicationsFolder()) return true;
+    const prompt = !!options.prompt;
+    if (!prompt) {
+      sendUpdaterStatus({ state: 'needs_install', message: 'Move OGforge to Applications to enable updates.' });
+      return false;
+    }
+    const { response } = await dialog.showMessageBox(mainWindow ?? undefined, {
+      type: 'question',
+      buttons: ['Move to Applications', 'Cancel'],
+      defaultId: 0,
+      cancelId: 1,
+      message: 'Move OGforge to Applications to enable updates?',
+      detail: 'macOS requires apps to live in Applications for auto-updates to work.'
+    });
+    if (response !== 0) {
+      sendUpdaterStatus({ state: 'needs_install', message: 'Move OGforge to Applications to enable updates.' });
+      return false;
+    }
+    const moved = app.moveToApplicationsFolder();
+    if (moved) {
+      sendUpdaterStatus({ state: 'relaunch', message: 'Moved to Applications. Restarting...' });
+      app.relaunch();
+      app.exit(0);
+      return false;
+    }
+    sendUpdaterStatus({ state: 'needs_install', message: 'Move OGforge to Applications to enable updates.' });
+    return false;
+  } catch (err) {
+    sendUpdaterStatus({ state: 'needs_install', message: err?.message || 'Move OGforge to Applications to enable updates.' });
+    return false;
+  }
+}
+
 function registerUpdaterIpc() {
-  ipcMain.handle('ogforge-updater:enable', async () => {
+  ipcMain.handle('ogforge-updater:enable', async (_event, opts = {}) => {
     if (!app.isPackaged) return { ok: false, reason: 'not_packaged' };
-    if (!ensureMacInstallLocation()) return { ok: false, reason: 'needs_install' };
+    if (!(await ensureMacInstallLocation({ prompt: !!opts.prompt }))) return { ok: false, reason: 'needs_install' };
     updaterEnabled = true;
     initAutoUpdater();
     try {
@@ -188,10 +224,10 @@ function registerUpdaterIpc() {
     }
   });
 
-  ipcMain.handle('ogforge-updater:check', async () => {
+  ipcMain.handle('ogforge-updater:check', async (_event, opts = {}) => {
     if (!app.isPackaged) return { ok: false, reason: 'not_packaged' };
     if (!updaterEnabled) return { ok: false, reason: 'disabled' };
-    if (!ensureMacInstallLocation()) return { ok: false, reason: 'needs_install' };
+    if (!(await ensureMacInstallLocation({ prompt: !!opts.prompt }))) return { ok: false, reason: 'needs_install' };
     initAutoUpdater();
     try {
       await autoUpdater.checkForUpdates();
@@ -202,9 +238,9 @@ function registerUpdaterIpc() {
     }
   });
 
-  ipcMain.handle('ogforge-updater:install', async () => {
+  ipcMain.handle('ogforge-updater:install', async (_event, opts = {}) => {
     if (!app.isPackaged) return { ok: false, reason: 'not_packaged' };
-    if (!ensureMacInstallLocation()) return { ok: false, reason: 'needs_install' };
+    if (!(await ensureMacInstallLocation({ prompt: !!opts.prompt }))) return { ok: false, reason: 'needs_install' };
     try {
       autoUpdater.quitAndInstall();
       return { ok: true };
@@ -214,10 +250,10 @@ function registerUpdaterIpc() {
     }
   });
 
-  ipcMain.handle('ogforge-updater:download', async () => {
+  ipcMain.handle('ogforge-updater:download', async (_event, opts = {}) => {
     if (!app.isPackaged) return { ok: false, reason: 'not_packaged' };
     if (!updaterEnabled) return { ok: false, reason: 'disabled' };
-    if (!ensureMacInstallLocation()) return { ok: false, reason: 'needs_install' };
+    if (!(await ensureMacInstallLocation({ prompt: !!opts.prompt }))) return { ok: false, reason: 'needs_install' };
     initAutoUpdater();
     try {
       await autoUpdater.downloadUpdate();
