@@ -154,25 +154,6 @@ function initAutoUpdater() {
   });
 }
 
-function ensureMacInstallLocation() {
-  if (process.platform !== 'darwin') return true;
-  try {
-    if (app.isInApplicationsFolder()) return true;
-    const moved = app.moveToApplicationsFolder();
-    if (moved) {
-      sendUpdaterStatus({ state: 'relaunch', message: 'Moved to Applications. Restarting...' });
-      app.relaunch();
-      app.exit(0);
-      return false;
-    }
-    sendUpdaterStatus({ state: 'needs_install', message: 'Move OGforge to Applications to enable updates.' });
-    return false;
-  } catch (err) {
-    sendUpdaterStatus({ state: 'needs_install', message: err?.message || 'Move OGforge to Applications to enable updates.' });
-    return false;
-  }
-}
-
 async function ensureMacInstallLocation(options = {}) {
   if (process.platform !== 'darwin') return true;
   try {
