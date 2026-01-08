@@ -61,6 +61,8 @@
             padding: 14px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.55), transparent);
             gap: 12px;
+            flex-wrap: wrap;
+            align-items: flex-start;
         }
 
         .stats-box {
@@ -99,6 +101,172 @@
         .ore-iron { color: #ffb86c; }
         .ore-gold { color: #ffd56a; }
         .ore-diamond { color: var(--cyan); }
+
+        .xp-box{
+            flex: 1 1 auto;
+            min-width: 160px;
+            max-width: 420px;
+            align-self: flex-start;
+            background: linear-gradient(180deg, rgba(32,24,12,.88), rgba(16,12,8,.78));
+            border: 1px solid rgba(255,205,110,.28);
+            border-radius: var(--radius-md);
+            padding: 10px 14px 12px;
+            box-shadow: 0 16px 36px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.10);
+            pointer-events: none;
+            position: relative;
+            overflow: hidden;
+        }
+        .xp-box::after{
+            content:"";
+            position:absolute;
+            inset: 1px;
+            border-radius: calc(var(--radius-md) - 1px);
+            border: 1px solid rgba(255,255,255,.06);
+            pointer-events:none;
+        }
+        .xp-label{
+            display:flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 10px;
+            font-size: 11px;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            font-weight: 800;
+            color: rgba(255,232,170,.92);
+        }
+        .xp-label .xp-value{
+            font-size: 10px;
+            color: rgba(255,236,190,.78);
+        }
+        .xp-track{
+            position: relative;
+            height: 12px;
+            margin-top: 8px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(0,0,0,.6), rgba(0,0,0,.35));
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.08), inset 0 6px 12px rgba(0,0,0,.45);
+            overflow: hidden;
+        }
+        .xp-fill{
+            height: 100%;
+            width: 0%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, rgba(255,205,90,.95), rgba(255,176,32,.98), rgba(255,220,140,.95));
+            box-shadow: 0 0 18px rgba(255,176,32,.55), inset 0 0 8px rgba(255,255,255,.25);
+            transition: width .25s ease-out;
+        }
+        .xp-sheen{
+            position:absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.45) 50%, transparent 100%);
+            transform: translateX(-120%);
+            animation: xp-sheen 3.8s ease-in-out infinite;
+            mix-blend-mode: screen;
+            opacity: 0.6;
+        }
+        @keyframes xp-sheen{
+            0%{ transform: translateX(-120%); }
+            55%{ transform: translateX(120%); }
+            100%{ transform: translateX(120%); }
+        }
+
+        .stats-ores{
+            min-width: 150px;
+        }
+        .ore-header{
+            display:flex;
+            align-items:center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        .ore-title{
+            font-size: 11px;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            font-weight: 800;
+            color: rgba(238,240,255,.8);
+        }
+        .ore-actions{
+            display:flex;
+            gap: 6px;
+        }
+        .ore-toggle,
+        .ore-filter-btn{
+            appearance: none;
+            border: 1px solid rgba(255,255,255,.15);
+            background: rgba(255,255,255,.06);
+            color: rgba(238,240,255,.9);
+            font-size: 10px;
+            letter-spacing: .5px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 800;
+        }
+        .ore-list{
+            display:flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .ore-row{
+            display:flex;
+            align-items:center;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .ore-left{
+            display:flex;
+            align-items:center;
+            gap: 6px;
+        }
+        .ore-count{
+            font-variant-numeric: tabular-nums;
+        }
+        .ore-filter{
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255,255,255,.08);
+        }
+        .ore-filter-grid{
+            display:grid;
+            grid-template-columns: repeat(2, minmax(0,1fr));
+            gap: 6px 10px;
+            margin-top: 6px;
+        }
+        .ore-filter-item{
+            display:flex;
+            align-items:center;
+            gap: 6px;
+            font-size: 11px;
+            color: rgba(238,240,255,.8);
+        }
+        .ore-filter-item input{
+            accent-color: #ffd56a;
+        }
+        .ore-filter-actions{
+            display:flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .ore-filter-actions button{
+            appearance: none;
+            border: 1px solid rgba(255,255,255,.16);
+            background: rgba(255,255,255,.06);
+            color: rgba(238,240,255,.85);
+            font-size: 10px;
+            letter-spacing: .5px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 800;
+        }
+        .stats-ores[data-collapsed="true"] .ore-list,
+        .stats-ores[data-collapsed="true"] .ore-filter{
+            display:none;
+        }
 
         #forge-menu, #esc-menu {
             position: absolute;
@@ -399,6 +567,8 @@
         @media (max-width: 520px) {
             .hud-top { padding: 10px; }
             .stats-box { min-width: 0; padding: 8px 10px; border-radius: 12px; }
+            .xp-box { width: 100%; min-width: 0; }
+            .stats-ores { width: 100%; }
             #forge-menu { width: 94%; }
             .forge-grid-2{ grid-template-columns: 1fr; }
             .forge-header{ padding: 16px 14px 10px; }
@@ -419,15 +589,33 @@
                 <div class="stat-row" style="margin-bottom:0;color:rgba(238,240,255,.78)"><span class="stat-icon" style="background:#7c5cff"></span> Depth <span id="ui-depth">0</span></div>
                 <div class="stat-row" style="margin-bottom:0;color:rgba(238,240,255,.78)"><span class="stat-icon" style="background:#ffb020"></span> Drills <span id="ui-drills">0</span></div>
             </div>
-            <div class="stats-box">
-                <div class="stat-row ore-coal"><span class="stat-icon" style="background:#2b2b2b; border:1px solid #555"></span> <span id="ui-coal">0</span></div>
-                <div class="stat-row ore-iron"><span class="stat-icon" style="background:#A19D94"></span> <span id="ui-iron">0</span></div>
-                <div class="stat-row ore-gold"><span class="stat-icon" style="background:#FFD700"></span> <span id="ui-gold">0</span></div>
-                <div class="stat-row ore-diamond"><span class="stat-icon" style="background:#00FFFF"></span> <span id="ui-diamond">0</span></div>
-                <div class="stat-row" style="color:#46ffb3"><span class="stat-icon" style="background:#46ffb3"></span> <span id="ui-emerald">0</span></div>
-                <div class="stat-row" style="color:#ff4d6d"><span class="stat-icon" style="background:#ff4d6d"></span> <span id="ui-ruby">0</span></div>
-                <div class="stat-row" style="color:#55a4ff"><span class="stat-icon" style="background:#55a4ff"></span> <span id="ui-sapphire">0</span></div>
-                <div class="stat-row" style="color:#bda6ff"><span class="stat-icon" style="background:#bda6ff"></span> <span id="ui-amethyst">0</span></div>
+            <div class="xp-box">
+                <div class="xp-label">
+                    <span>Level <span id="ui-level">1</span></span>
+                    <span class="xp-value"><span id="ui-xp">0</span>/<span id="ui-xp-next">0</span> XP</span>
+                </div>
+                <div class="xp-track">
+                    <div class="xp-fill" id="ui-xp-fill"></div>
+                    <div class="xp-sheen"></div>
+                </div>
+            </div>
+            <div class="stats-box stats-ores" id="ore-box" data-collapsed="false">
+                <div class="ore-header">
+                    <div class="ore-title">Ores</div>
+                    <div class="ore-actions">
+                        <button class="ore-filter-btn" id="ore-filter-btn" type="button">Filter</button>
+                        <button class="ore-toggle" id="ore-toggle" type="button">–</button>
+                    </div>
+                </div>
+                <div id="ore-list" class="ore-list"></div>
+                <div id="ore-filter" class="ore-filter" hidden>
+                    <div class="ore-title">Display</div>
+                    <div class="ore-filter-grid" id="ore-filter-grid"></div>
+                    <div class="ore-filter-actions">
+                        <button type="button" id="ore-filter-all">All</button>
+                        <button type="button" id="ore-filter-none">None</button>
+                    </div>
+                </div>
             </div>
         </div>
         <div id="message-area" onclick="interactAction()">Press E to interact</div>
@@ -473,40 +661,7 @@
                         <div class="forge-kicker" style="margin:0">Inventory</div>
                         <div class="forge-muted">Prices shown are base</div>
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
-                        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:12px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.06)">
-                            <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#aab0c4;margin-right:8px;box-shadow:0 0 0 1px rgba(255,255,255,.10)"></span>Coal</span>
-                            <span><span id="ui-coal-menu">0</span> · $5</span>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:12px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.06)">
-                            <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ffb86c;margin-right:8px;box-shadow:0 0 0 1px rgba(255,255,255,.10)"></span>Iron</span>
-                            <span><span id="ui-iron-menu">0</span> · $15</span>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:12px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.06)">
-                            <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ffd56a;margin-right:8px;box-shadow:0 0 0 1px rgba(255,255,255,.10)"></span>Gold</span>
-                            <span><span id="ui-gold-menu">0</span> · $40</span>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:12px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.06)">
-                            <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#39e6ff;margin-right:8px;box-shadow:0 0 0 1px rgba(255,255,255,.10)"></span>Diamond</span>
-                            <span><span id="ui-diamond-menu">0</span> · $100</span>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:12px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.06)">
-                            <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#46ffb3;margin-right:8px;box-shadow:0 0 0 1px rgba(255,255,255,.10)"></span>Emerald</span>
-                            <span><span id="ui-emerald-menu">0</span> · $180</span>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:12px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.06)">
-                            <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ff4d6d;margin-right:8px;box-shadow:0 0 0 1px rgba(255,255,255,.10)"></span>Ruby</span>
-                            <span><span id="ui-ruby-menu">0</span> · $260</span>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:12px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.06)">
-                            <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#55a4ff;margin-right:8px;box-shadow:0 0 0 1px rgba(255,255,255,.10)"></span>Sapphire</span>
-                            <span><span id="ui-sapphire-menu">0</span> · $380</span>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:12px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.06)">
-                            <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#bda6ff;margin-right:8px;box-shadow:0 0 0 1px rgba(255,255,255,.10)"></span>Amethyst</span>
-                            <span><span id="ui-amethyst-menu">0</span> · $600</span>
-                        </div>
-                    </div>
+                    <div id="forge-inventory-list" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px"></div>
                 </div>
             </div>
 
@@ -543,6 +698,22 @@
                 <button class="btn" id="btn-upg-drill" onclick="game.upgradeDrill()">
                     <span>Turbo Drill</span>
                     <span id="cost-drill">$650</span>
+                </button>
+                <button class="btn" id="btn-upg-xp" onclick="game.upgradeXpBoost()">
+                    <span>Scholar's Sigil</span>
+                    <span id="cost-xp">$350</span>
+                </button>
+                <button class="btn" id="btn-upg-crit" onclick="game.upgradeCrit()">
+                    <span>Critical Strike</span>
+                    <span id="cost-crit">$450</span>
+                </button>
+                <button class="btn" id="btn-upg-rigcore" onclick="game.upgradeRigCore()">
+                    <span>Rig Overclock</span>
+                    <span id="cost-rigcore">$550</span>
+                </button>
+                <button class="btn" id="btn-upg-magnet" onclick="game.upgradeOreMagnet()">
+                    <span>Ore Magnet</span>
+                    <span id="cost-magnet">$500</span>
                 </button>
             </div>
 
@@ -635,26 +806,116 @@ const T_EMERALD = 6;
 const T_RUBY = 7;
 const T_SAPPHIRE = 8;
 const T_AMETHYST = 11;
+const T_TOPAZ = 13;
+const T_OPAL = 14;
+const T_TITANIUM = 15;
+const T_PLATINUM = 16;
+const T_OBSIDIAN = 17;
+const T_JADE = 18;
+const T_ONYX = 19;
+const T_MYTHRIL = 20;
+const T_CELESTITE = 21;
+const T_VOIDSTONE = 22;
 const T_BEDROCK = 9;
 const T_FORGE = 10;
 const T_CACHE = 12;
+
+const ORE_DEFS = {
+    coal: { key: 'coal', name: 'Coal', tile: T_COAL, color: '#aab0c4', overlay: 'rgba(210,215,235,0.72)', value: 5, hp: 80, xp: 2, p0: 0.2400, p1: 0.1200, kind: 'lump', bright: false },
+    iron: { key: 'iron', name: 'Iron', tile: T_IRON, color: '#d1b19c', overlay: 'rgba(255,184,108,0.82)', value: 15, hp: 120, xp: 4, p0: 0.1050, p1: 0.1350, kind: 'lump', bright: false },
+    gold: { key: 'gold', name: 'Gold', tile: T_GOLD, color: '#ffd56a', overlay: 'rgba(255,213,106,0.90)', value: 40, hp: 200, xp: 7, p0: 0.0320, p1: 0.0600, kind: 'lump', bright: false },
+    diamond: { key: 'diamond', name: 'Diamond', tile: T_DIAMOND, color: '#39e6ff', overlay: 'rgba(57,230,255,0.95)', value: 100, hp: 300, xp: 12, p0: 0.0095, p1: 0.0200, kind: 'facet', bright: true },
+    emerald: { key: 'emerald', name: 'Emerald', tile: T_EMERALD, color: '#46ffb3', overlay: 'rgba(70,255,179,0.95)', value: 180, hp: 420, xp: 18, p0: 0.0022, p1: 0.0076, kind: 'facet', bright: true },
+    ruby: { key: 'ruby', name: 'Ruby', tile: T_RUBY, color: '#ff4d6d', overlay: 'rgba(255,77,109,0.95)', value: 260, hp: 550, xp: 24, p0: 0.0010, p1: 0.0046, kind: 'facet', bright: true },
+    sapphire: { key: 'sapphire', name: 'Sapphire', tile: T_SAPPHIRE, color: '#55a4ff', overlay: 'rgba(85,164,255,0.95)', value: 380, hp: 700, xp: 32, p0: 0.00055, p1: 0.0031, kind: 'facet', bright: true },
+    amethyst: { key: 'amethyst', name: 'Amethyst', tile: T_AMETHYST, color: '#bda6ff', overlay: 'rgba(189,166,255,0.95)', value: 600, hp: 900, xp: 42, p0: 0.00025, p1: 0.0022, kind: 'facet', bright: true },
+    topaz: { key: 'topaz', name: 'Topaz', tile: T_TOPAZ, color: '#ffd27a', overlay: 'rgba(255,210,122,0.92)', value: 850, hp: 1100, xp: 54, p0: 0.00018, p1: 0.0018, kind: 'facet', bright: true },
+    opal: { key: 'opal', name: 'Opal', tile: T_OPAL, color: '#a7f0ff', overlay: 'rgba(167,240,255,0.95)', value: 1100, hp: 1300, xp: 66, p0: 0.00014, p1: 0.0014, kind: 'facet', bright: true },
+    titanium: { key: 'titanium', name: 'Titanium', tile: T_TITANIUM, color: '#b6c1d6', overlay: 'rgba(182,193,214,0.86)', value: 1450, hp: 1550, xp: 82, p0: 0.0001, p1: 0.0010, kind: 'lump', bright: false },
+    platinum: { key: 'platinum', name: 'Platinum', tile: T_PLATINUM, color: '#e2e4ff', overlay: 'rgba(226,228,255,0.9)', value: 1900, hp: 1750, xp: 98, p0: 0.00008, p1: 0.00085, kind: 'lump', bright: false },
+    obsidian: { key: 'obsidian', name: 'Obsidian', tile: T_OBSIDIAN, color: '#3a2b3d', overlay: 'rgba(118,88,140,0.75)', value: 2400, hp: 2050, xp: 120, p0: 0.00006, p1: 0.00065, kind: 'lump', bright: false },
+    jade: { key: 'jade', name: 'Jade', tile: T_JADE, color: '#48f0a0', overlay: 'rgba(72,240,160,0.9)', value: 3000, hp: 2350, xp: 150, p0: 0.000045, p1: 0.0005, kind: 'facet', bright: true },
+    onyx: { key: 'onyx', name: 'Onyx', tile: T_ONYX, color: '#525a70', overlay: 'rgba(120,130,168,0.85)', value: 3800, hp: 2700, xp: 190, p0: 0.00003, p1: 0.00035, kind: 'facet', bright: true },
+    mythril: { key: 'mythril', name: 'Mythril', tile: T_MYTHRIL, color: '#6bdcff', overlay: 'rgba(107,220,255,0.95)', value: 4800, hp: 3200, xp: 240, p0: 0.00002, p1: 0.00022, kind: 'facet', bright: true },
+    celestite: { key: 'celestite', name: 'Celestite', tile: T_CELESTITE, color: '#a7b8ff', overlay: 'rgba(170,184,255,0.95)', value: 6200, hp: 3800, xp: 310, p0: 0.000012, p1: 0.00012, kind: 'facet', bright: true },
+    voidstone: { key: 'voidstone', name: 'Voidstone', tile: T_VOIDSTONE, color: '#b07dff', overlay: 'rgba(176,125,255,0.95)', value: 8200, hp: 4600, xp: 420, p0: 0.000006, p1: 0.00008, kind: 'facet', bright: true }
+};
+
+const ORE_UI_ORDER = [
+    'coal', 'iron', 'gold', 'diamond', 'emerald', 'ruby', 'sapphire', 'amethyst',
+    'topaz', 'opal', 'titanium', 'platinum', 'obsidian', 'jade', 'onyx', 'mythril', 'celestite', 'voidstone'
+];
+
+const ORE_DIST_ORDER = [
+    'voidstone', 'celestite', 'mythril', 'onyx', 'jade', 'obsidian', 'platinum', 'titanium',
+    'opal', 'topaz', 'amethyst', 'sapphire', 'ruby', 'emerald', 'diamond', 'gold', 'iron', 'coal'
+];
+
+const ORES = ORE_UI_ORDER.map((key) => ORE_DEFS[key]).filter(Boolean);
+const ORE_DIST = ORE_DIST_ORDER.map((key) => ORE_DEFS[key]).filter(Boolean);
+const ORE_BY_KEY = {};
+const ORE_BY_TILE = {};
+for (const ore of ORES) {
+    ORE_BY_KEY[ore.key] = ore;
+    ORE_BY_TILE[ore.tile] = ore;
+}
 
 // Colors
 const COLORS = {
     [T_FLOOR]: '#151520',
     [T_WALL]: '#232336',
-    [T_COAL]: '#aab0c4',
-    [T_IRON]: '#d1b19c',
-    [T_GOLD]: '#ffd56a',
-    [T_DIAMOND]: '#39e6ff',
-    [T_EMERALD]: '#46ffb3',
-    [T_RUBY]: '#ff4d6d',
-    [T_SAPPHIRE]: '#55a4ff',
-    [T_AMETHYST]: '#bda6ff',
     [T_BEDROCK]: '#0a0a10',
     [T_FORGE]: '#ff4d6d',
     [T_CACHE]: '#ffd56a'
 };
+for (const ore of ORES) {
+    COLORS[ore.tile] = ore.color;
+}
+
+const DEFAULT_LEVELS = {
+    pick: 1,
+    boots: 1,
+    light: 1,
+    reach: 1,
+    smelt: 1,
+    luck: 1,
+    drill: 1,
+    xp: 1,
+    crit: 1,
+    rigcore: 1,
+    magnet: 1
+};
+
+function makeEmptyInventory() {
+    const inv = {};
+    for (const ore of ORES) inv[ore.key] = 0;
+    return inv;
+}
+
+function normalizeInventory(inv) {
+    const out = makeEmptyInventory();
+    if (!inv || typeof inv !== 'object') return out;
+    for (const ore of ORES) {
+        const raw = Number(inv[ore.key] ?? 0);
+        if (Number.isFinite(raw) && raw > 0) out[ore.key] = Math.floor(raw);
+    }
+    return out;
+}
+
+function normalizeLevels(levels) {
+    const out = { ...DEFAULT_LEVELS };
+    if (!levels || typeof levels !== 'object') return out;
+    for (const key of Object.keys(DEFAULT_LEVELS)) {
+        const raw = Number(levels[key]);
+        if (Number.isFinite(raw) && raw >= 1) out[key] = Math.floor(raw);
+    }
+    return out;
+}
+
+function xpForLevel(level) {
+    const l = Math.max(1, Math.floor(level || 1));
+    return Math.floor(80 + Math.pow(l, 1.55) * 45);
+}
 
 // Art palette (used for gradients/glows)
 const ART = {
@@ -728,6 +989,197 @@ function generateRedeemCode() {
     return `${part(4)}-${part(4)}`;
 }
 
+const ORE_UI_STATE_KEY = 'ogforge-ore-ui-v1';
+const ORE_VISIBLE_KEY = 'ogforge-ore-visible-v1';
+
+const OreUi = {
+    init() {
+        this.box = document.getElementById('ore-box');
+        this.list = document.getElementById('ore-list');
+        this.filter = document.getElementById('ore-filter');
+        this.filterGrid = document.getElementById('ore-filter-grid');
+        this.filterBtn = document.getElementById('ore-filter-btn');
+        this.toggleBtn = document.getElementById('ore-toggle');
+        this.inventoryList = document.getElementById('forge-inventory-list');
+        if (!this.box || !this.list || !this.filterGrid || !this.inventoryList) return;
+
+        this.visible = this._loadVisibility();
+        this._buildOreList();
+        this._buildInventoryList();
+        this._buildFilter();
+
+        const collapsed = this._loadCollapsed();
+        this.setCollapsed(collapsed);
+
+        if (this.toggleBtn) {
+            this.toggleBtn.addEventListener('click', () => this.setCollapsed(!this.isCollapsed));
+        }
+        if (this.filterBtn) {
+            this.filterBtn.addEventListener('click', () => {
+                if (this.isCollapsed || !this.filter) return;
+                this.filter.hidden = !this.filter.hidden;
+            });
+        }
+    },
+    _buildOreList() {
+        this.list.innerHTML = '';
+        for (const ore of ORES) {
+            const row = document.createElement('div');
+            row.className = 'ore-row';
+            row.dataset.oreKey = ore.key;
+            const left = document.createElement('div');
+            left.className = 'ore-left';
+            const dot = document.createElement('span');
+            dot.className = 'stat-icon';
+            dot.style.background = ore.color;
+            if (ore.key === 'coal') dot.style.border = '1px solid rgba(255,255,255,.35)';
+            const name = document.createElement('span');
+            name.textContent = ore.name;
+            left.appendChild(dot);
+            left.appendChild(name);
+            const count = document.createElement('span');
+            count.className = 'ore-count';
+            count.id = `ui-${ore.key}`;
+            count.textContent = '0';
+            row.appendChild(left);
+            row.appendChild(count);
+            this.list.appendChild(row);
+        }
+        this.applyVisibility();
+    },
+    _buildInventoryList() {
+        this.inventoryList.innerHTML = '';
+        for (const ore of ORES) {
+            const item = document.createElement('div');
+            item.style.display = 'flex';
+            item.style.justifyContent = 'space-between';
+            item.style.alignItems = 'center';
+            item.style.padding = '8px 10px';
+            item.style.borderRadius = '12px';
+            item.style.background = 'rgba(0,0,0,.18)';
+            item.style.border = '1px solid rgba(255,255,255,.06)';
+
+            const left = document.createElement('span');
+            const dot = document.createElement('span');
+            dot.style.display = 'inline-block';
+            dot.style.width = '10px';
+            dot.style.height = '10px';
+            dot.style.borderRadius = '50%';
+            dot.style.background = ore.color;
+            dot.style.marginRight = '8px';
+            dot.style.boxShadow = '0 0 0 1px rgba(255,255,255,.10)';
+            if (ore.key === 'coal') dot.style.border = '1px solid rgba(255,255,255,.35)';
+            left.appendChild(dot);
+            left.appendChild(document.createTextNode(ore.name));
+
+            const right = document.createElement('span');
+            const count = document.createElement('span');
+            count.id = `ui-${ore.key}-menu`;
+            count.textContent = '0';
+            right.appendChild(count);
+            right.appendChild(document.createTextNode(` · $${ORE_VALUE[ore.key]}`));
+
+            item.appendChild(left);
+            item.appendChild(right);
+            this.inventoryList.appendChild(item);
+        }
+    },
+    _buildFilter() {
+        this.filterGrid.innerHTML = '';
+        for (const ore of ORES) {
+            const label = document.createElement('label');
+            label.className = 'ore-filter-item';
+            label.dataset.oreKey = ore.key;
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.checked = this.visible[ore.key] !== false;
+            input.addEventListener('change', () => {
+                this.visible[ore.key] = input.checked;
+                this.applyVisibility();
+                this._saveVisibility();
+            });
+            const text = document.createElement('span');
+            text.textContent = ore.name;
+            label.appendChild(input);
+            label.appendChild(text);
+            this.filterGrid.appendChild(label);
+        }
+
+        const btnAll = document.getElementById('ore-filter-all');
+        const btnNone = document.getElementById('ore-filter-none');
+        if (btnAll) {
+            btnAll.addEventListener('click', () => {
+                for (const ore of ORES) this.visible[ore.key] = true;
+                this._syncFilterChecks();
+                this.applyVisibility();
+                this._saveVisibility();
+            });
+        }
+        if (btnNone) {
+            btnNone.addEventListener('click', () => {
+                for (const ore of ORES) this.visible[ore.key] = false;
+                this._syncFilterChecks();
+                this.applyVisibility();
+                this._saveVisibility();
+            });
+        }
+    },
+    _syncFilterChecks() {
+        const inputs = this.filterGrid.querySelectorAll('input[type="checkbox"]');
+        for (const input of inputs) {
+            const label = input.closest('label');
+            const key = label ? label.dataset.oreKey : '';
+            if (key) input.checked = this.visible[key] !== false;
+        }
+    },
+    applyVisibility() {
+        const rows = this.list.querySelectorAll('.ore-row');
+        for (const row of rows) {
+            const key = row.dataset.oreKey;
+            row.style.display = this.visible[key] === false ? 'none' : '';
+        }
+    },
+    setCollapsed(collapsed) {
+        this.isCollapsed = Boolean(collapsed);
+        this.box.dataset.collapsed = this.isCollapsed ? 'true' : 'false';
+        if (this.toggleBtn) this.toggleBtn.textContent = this.isCollapsed ? '+' : '–';
+        if (this.filter) this.filter.hidden = true;
+        this._saveCollapsed();
+    },
+    _loadCollapsed() {
+        try {
+            const raw = safeGet(ORE_UI_STATE_KEY);
+            const parsed = raw ? JSON.parse(raw) : null;
+            return Boolean(parsed && parsed.collapsed);
+        } catch {
+            return false;
+        }
+    },
+    _saveCollapsed() {
+        try {
+            safeSet(ORE_UI_STATE_KEY, JSON.stringify({ collapsed: this.isCollapsed }));
+        } catch {}
+    },
+    _loadVisibility() {
+        try {
+            const raw = safeGet(ORE_VISIBLE_KEY);
+            const parsed = raw ? JSON.parse(raw) : null;
+            const vis = {};
+            for (const ore of ORES) vis[ore.key] = parsed ? parsed[ore.key] !== false : true;
+            return vis;
+        } catch {
+            const vis = {};
+            for (const ore of ORES) vis[ore.key] = true;
+            return vis;
+        }
+    },
+    _saveVisibility() {
+        try {
+            safeSet(ORE_VISIBLE_KEY, JSON.stringify(this.visible));
+        } catch {}
+    }
+};
+
 function clamp01(v) {
     return Math.max(0, Math.min(1, v));
 }
@@ -752,6 +1204,11 @@ function roundRectPath(ctx, x, y, w, h, r) {
     ctx.arcTo(x, y + h, x, y, radius);
     ctx.arcTo(x, y, x + w, y, radius);
     ctx.closePath();
+}
+
+function isBrightOre(tileType) {
+    const ore = ORE_BY_TILE[tileType];
+    return Boolean(ore && ore.bright);
 }
 
 const SaveManager = {
@@ -1017,7 +1474,7 @@ class TileArt {
         ctx.shadowBlur = 18;
         ctx.fillStyle = color;
 
-        if (kind === 'diamond') {
+        if (kind === 'facet') {
             ctx.beginPath();
             ctx.moveTo(cx, cy - 10);
             ctx.lineTo(cx + 10, cy);
@@ -1092,14 +1549,9 @@ class TileArt {
                 });
             };
 
-            oreBuild(T_COAL, 'rgba(210,215,235,0.72)', 'coal');
-            oreBuild(T_IRON, 'rgba(255,184,108,0.82)', 'iron');
-            oreBuild(T_GOLD, 'rgba(255,213,106,0.90)', 'gold');
-            oreBuild(T_DIAMOND, 'rgba(57,230,255,0.95)', 'diamond');
-            oreBuild(T_EMERALD, 'rgba(70,255,179,0.95)', 'emerald');
-            oreBuild(T_RUBY, 'rgba(255,77,109,0.95)', 'ruby');
-            oreBuild(T_SAPPHIRE, 'rgba(85,164,255,0.95)', 'sapphire');
-            oreBuild(T_AMETHYST, 'rgba(189,166,255,0.95)', 'amethyst');
+            for (const ore of ORES) {
+                oreBuild(ore.tile, ore.overlay, ore.kind);
+            }
 
             this._build(T_CACHE, v, (ctx, seed) => {
                 this._stoneBase(ctx, seed, ART.floor0, ART.floor1);
@@ -1143,28 +1595,17 @@ class TileArt {
 
 // Mining Health (Hits required)
 const TILE_HP = {
-    [T_WALL]: 60,
-    [T_COAL]: 80,
-    [T_IRON]: 120,
-    [T_GOLD]: 200,
-    [T_DIAMOND]: 300,
-    [T_EMERALD]: 420,
-    [T_RUBY]: 550,
-    [T_SAPPHIRE]: 700,
-    [T_AMETHYST]: 900
+    [T_WALL]: 60
 };
+for (const ore of ORES) {
+    TILE_HP[ore.tile] = ore.hp;
+}
 
 // Ore Values
-const ORE_VALUE = {
-    coal: 5,
-    iron: 15,
-    gold: 40,
-    diamond: 100,
-    emerald: 180,
-    ruby: 260,
-    sapphire: 380,
-    amethyst: 600
-};
+const ORE_VALUE = {};
+for (const ore of ORES) {
+    ORE_VALUE[ore.key] = ore.value;
+}
 
 // --- Game Engine Classes ---
 
@@ -1337,8 +1778,8 @@ class DrillRig {
             return;
         }
 
-        const power = 2.2;
-        const interval = 12;
+        const power = game.player.drillPower;
+        const interval = game.player.drillInterval;
         this.cooldown = interval;
 
         const hp = game.map.getHp(tx, ty) - power;
@@ -1461,7 +1902,7 @@ class AudioManager {
     }
 
     playMineHit(tileType) {
-        const bright = (tileType === T_DIAMOND || tileType === T_SAPPHIRE || tileType === T_AMETHYST) ? 1600 : 1100;
+        const bright = isBrightOre(tileType) ? 1600 : 1100;
         this._noise(0.045, bright, 0.18);
         this._tone(140 + Math.random() * 40, 0.04, 0.05, 'square');
     }
@@ -1548,7 +1989,9 @@ class Player {
         
         // Stats
         this.money = 0;
-        this.inventory = { coal: 0, iron: 0, gold: 0, diamond: 0, emerald: 0, ruby: 0, sapphire: 0, amethyst: 0 };
+        this.inventory = makeEmptyInventory();
+        this.level = 1;
+        this.xp = 0;
         
         // Upgrades
         this.miningPower = 2; // Damage per tick
@@ -1558,9 +2001,15 @@ class Player {
         this.miningInterval = 5; // Damage applied every N ticks while mining
         this.sellMultiplier = 1.0;
         this.luck = 0.0; // Chance for bonus drops
+        this.xpBoost = 0.0;
+        this.critChance = 0.0;
+        this.critMultiplier = 2.0;
+        this.drillPower = 2.2;
+        this.drillInterval = 12;
+        this.oreBonus = 0.0;
         
         // Upgrade Levels (for costs)
-        this.levels = { pick: 1, boots: 1, light: 1, reach: 1, smelt: 1, luck: 1, drill: 1 };
+        this.levels = { ...DEFAULT_LEVELS };
     }
     
     update(input, map) {
@@ -1790,24 +2239,11 @@ class InfiniteMap {
         const r = seeded01(this._h(tx, ty, 0x0ae5));
         const lerp = (a, b, t) => a + (b - a) * t;
 
-        const pAmethyst = lerp(0.00025, 0.00220, depth);
-        const pSapphire = lerp(0.00055, 0.00310, depth);
-        const pRuby = lerp(0.00100, 0.00460, depth);
-        const pEmerald = lerp(0.00220, 0.00760, depth);
-        const pDiamond = lerp(0.00950, 0.0200, depth);
-        const pGold = lerp(0.0320, 0.0600, depth);
-        const pIron = lerp(0.1050, 0.1350, depth);
-        const pCoal = lerp(0.2400, 0.1200, depth);
-
         let t = r;
-        if ((t -= pAmethyst) < 0) return T_AMETHYST;
-        if ((t -= pSapphire) < 0) return T_SAPPHIRE;
-        if ((t -= pRuby) < 0) return T_RUBY;
-        if ((t -= pEmerald) < 0) return T_EMERALD;
-        if ((t -= pDiamond) < 0) return T_DIAMOND;
-        if ((t -= pGold) < 0) return T_GOLD;
-        if ((t -= pIron) < 0) return T_IRON;
-        if ((t -= pCoal) < 0) return T_COAL;
+        for (const ore of ORE_DIST) {
+            const p = lerp(ore.p0, ore.p1, depth);
+            if ((t -= p) < 0) return ore.tile;
+        }
         return T_WALL;
     }
 
@@ -2117,26 +2553,16 @@ class Game {
     
     sellAll() {
         let total = 0;
-        total += this.player.inventory.coal * ORE_VALUE.coal;
-        total += this.player.inventory.iron * ORE_VALUE.iron;
-        total += this.player.inventory.gold * ORE_VALUE.gold;
-        total += this.player.inventory.diamond * ORE_VALUE.diamond;
-        total += this.player.inventory.emerald * ORE_VALUE.emerald;
-        total += this.player.inventory.ruby * ORE_VALUE.ruby;
-        total += this.player.inventory.sapphire * ORE_VALUE.sapphire;
-        total += this.player.inventory.amethyst * ORE_VALUE.amethyst;
+        for (const ore of ORES) {
+            total += this.player.inventory[ore.key] * ORE_VALUE[ore.key];
+        }
         total = Math.floor(total * this.player.sellMultiplier);
         
         if (total > 0) {
             this.player.money += total;
-            this.player.inventory.coal = 0;
-            this.player.inventory.iron = 0;
-            this.player.inventory.gold = 0;
-            this.player.inventory.diamond = 0;
-            this.player.inventory.emerald = 0;
-            this.player.inventory.ruby = 0;
-            this.player.inventory.sapphire = 0;
-            this.player.inventory.amethyst = 0;
+            for (const ore of ORES) {
+                this.player.inventory[ore.key] = 0;
+            }
             this.spawnFloater(this.player.x, this.player.y - 20, `+$${total}`, '#50fa7b');
             this.updateUi();
         }
@@ -2210,6 +2636,79 @@ class Game {
             this.player.levels.drill++;
             this.updateUi();
         }
+    }
+
+    upgradeXpBoost() {
+        const cost = this.player.levels.xp * 350;
+        if (this.player.money >= cost) {
+            this.player.money -= cost;
+            this.player.xpBoost = Math.min(1.0, this.player.xpBoost + 0.15);
+            this.player.levels.xp++;
+            this.updateUi();
+        }
+    }
+
+    upgradeCrit() {
+        const cost = this.player.levels.crit * 450;
+        if (this.player.money >= cost) {
+            this.player.money -= cost;
+            this.player.critChance = Math.min(0.35, this.player.critChance + 0.04);
+            this.player.levels.crit++;
+            this.updateUi();
+        }
+    }
+
+    upgradeRigCore() {
+        const cost = this.player.levels.rigcore * 550;
+        if (this.player.money >= cost) {
+            this.player.money -= cost;
+            this.player.drillInterval = Math.max(6, this.player.drillInterval - 1);
+            this.player.drillPower = Math.min(6, this.player.drillPower + 0.25);
+            this.player.levels.rigcore++;
+            this.updateUi();
+        }
+    }
+
+    upgradeOreMagnet() {
+        const cost = this.player.levels.magnet * 500;
+        if (this.player.money >= cost) {
+            this.player.money -= cost;
+            this.player.oreBonus = Math.min(0.35, this.player.oreBonus + 0.05);
+            this.player.levels.magnet++;
+            this.updateUi();
+        }
+    }
+
+    gainXp(amount) {
+        if (!Number.isFinite(amount) || amount <= 0) return;
+        const gain = Math.max(0, Math.floor(amount * (1 + this.player.xpBoost)));
+        if (gain <= 0) return;
+        this.player.xp += gain;
+        let leveled = false;
+        while (this.player.xp >= xpForLevel(this.player.level)) {
+            this.player.xp -= xpForLevel(this.player.level);
+            this.player.level += 1;
+            leveled = true;
+        }
+        if (leveled) {
+            this.spawnFloater(this.player.x, this.player.y - 30, `LEVEL ${this.player.level}`, '#ffd56a');
+            showToast(`Level up! Now level ${this.player.level}.`);
+        }
+        this.updateXpUi();
+    }
+
+    updateXpUi() {
+        const levelEl = document.getElementById('ui-level');
+        const xpEl = document.getElementById('ui-xp');
+        const xpNextEl = document.getElementById('ui-xp-next');
+        const xpFill = document.getElementById('ui-xp-fill');
+        const next = xpForLevel(this.player.level);
+        const current = Math.max(0, Math.floor(this.player.xp));
+        const pct = next > 0 ? Math.min(1, current / next) : 0;
+        if (levelEl) levelEl.textContent = this.player.level;
+        if (xpEl) xpEl.textContent = current;
+        if (xpNextEl) xpNextEl.textContent = next;
+        if (xpFill) xpFill.style.width = `${(pct * 100).toFixed(1)}%`;
     }
     
     update() {
@@ -2364,10 +2863,11 @@ class Game {
         this.audio.playCacheOpen();
 
         const depth = this.getDepth();
-        const tier = depth < 20 ? ['coal', 'iron'] :
-            depth < 55 ? ['coal', 'iron', 'gold', 'diamond'] :
-            depth < 90 ? ['iron', 'gold', 'diamond', 'emerald', 'ruby'] :
-            ['gold', 'diamond', 'emerald', 'ruby', 'sapphire', 'amethyst'];
+        const tier = depth < 20 ? ['coal', 'iron', 'gold'] :
+            depth < 55 ? ['coal', 'iron', 'gold', 'diamond', 'topaz'] :
+            depth < 90 ? ['iron', 'gold', 'diamond', 'emerald', 'ruby', 'topaz', 'opal'] :
+            depth < 130 ? ['gold', 'diamond', 'emerald', 'ruby', 'sapphire', 'amethyst', 'opal', 'titanium', 'platinum'] :
+            ['diamond', 'emerald', 'ruby', 'sapphire', 'amethyst', 'topaz', 'opal', 'titanium', 'platinum', 'obsidian', 'jade', 'onyx', 'mythril', 'celestite', 'voidstone'];
 
         const picks = 2 + (Math.random() < 0.35 ? 1 : 0);
         for (let i = 0; i < picks; i++) {
@@ -2399,15 +2899,8 @@ class Game {
     }
 
     _tileForInvKey(key) {
-        if (key === 'coal') return T_COAL;
-        if (key === 'iron') return T_IRON;
-        if (key === 'gold') return T_GOLD;
-        if (key === 'diamond') return T_DIAMOND;
-        if (key === 'emerald') return T_EMERALD;
-        if (key === 'ruby') return T_RUBY;
-        if (key === 'sapphire') return T_SAPPHIRE;
-        if (key === 'amethyst') return T_AMETHYST;
-        return T_CACHE;
+        const ore = ORE_BY_KEY[key];
+        return ore ? ore.tile : T_CACHE;
     }
     
     mineTile(tx, ty, worldX, worldY) {
@@ -2425,7 +2918,9 @@ class Game {
                 this.player.pulseMine();
                 
                 // Damage
-                const hp = this.map.getHp(tx, ty) - this.player.miningPower;
+                const crit = this.player.critChance > 0 && Math.random() < this.player.critChance;
+                const damage = crit ? this.player.miningPower * this.player.critMultiplier : this.player.miningPower;
+                const hp = this.map.getHp(tx, ty) - damage;
                 this.map.setHp(tx, ty, hp);
                 
                 // Break
@@ -2453,31 +2948,23 @@ class Game {
         
         // Loot
         let item = null;
-        if (type === T_COAL) { this.player.inventory.coal++; item="Coal"; }
-        if (type === T_IRON) { this.player.inventory.iron++; item="Iron"; }
-        if (type === T_GOLD) { this.player.inventory.gold++; item="Gold"; }
-        if (type === T_DIAMOND) { this.player.inventory.diamond++; item="Diamond"; }
-        if (type === T_EMERALD) { this.player.inventory.emerald++; item="Emerald"; }
-        if (type === T_RUBY) { this.player.inventory.ruby++; item="Ruby"; }
-        if (type === T_SAPPHIRE) { this.player.inventory.sapphire++; item="Sapphire"; }
-        if (type === T_AMETHYST) { this.player.inventory.amethyst++; item="Amethyst"; }
+        const ore = ORE_BY_TILE[type];
+        if (ore) {
+            this.player.inventory[ore.key] += 1;
+            item = ore.name;
+        }
         
         if (item) {
             this.spawnFloater(tx*TILE_SIZE, ty*TILE_SIZE, `+1 ${item}`, COLORS[type]);
-            const bonusChance = Math.min(0.18, this.player.luck * 0.35);
+            const bonusChance = Math.min(0.4, this.player.luck * 0.35 + this.player.oreBonus);
             if (bonusChance > 0 && Math.random() < bonusChance) {
-                if (type === T_COAL) this.player.inventory.coal++;
-                if (type === T_IRON) this.player.inventory.iron++;
-                if (type === T_GOLD) this.player.inventory.gold++;
-                if (type === T_DIAMOND) this.player.inventory.diamond++;
-                if (type === T_EMERALD) this.player.inventory.emerald++;
-                if (type === T_RUBY) this.player.inventory.ruby++;
-                if (type === T_SAPPHIRE) this.player.inventory.sapphire++;
-                if (type === T_AMETHYST) this.player.inventory.amethyst++;
+                this.player.inventory[ore.key] += 1;
                 this.spawnFloater(tx*TILE_SIZE, ty*TILE_SIZE - 14, `BONUS +1`, COLORS[type]);
             }
             this.updateUi();
         }
+        const xpGain = ore ? ore.xp : 1;
+        if (xpGain > 0) this.gainXp(xpGain);
     }
     
     spawnFloater(x, y, text, color) {
@@ -2487,27 +2974,19 @@ class Game {
     updateUi() {
         document.getElementById('ui-money').innerText = this.player.money;
         document.getElementById('ui-drills').innerText = this.player.drillRigs;
-        document.getElementById('ui-coal').innerText = this.player.inventory.coal;
-        document.getElementById('ui-iron').innerText = this.player.inventory.iron;
-        document.getElementById('ui-gold').innerText = this.player.inventory.gold;
-        document.getElementById('ui-diamond').innerText = this.player.inventory.diamond;
-        document.getElementById('ui-emerald').innerText = this.player.inventory.emerald;
-        document.getElementById('ui-ruby').innerText = this.player.inventory.ruby;
-        document.getElementById('ui-sapphire').innerText = this.player.inventory.sapphire;
-        document.getElementById('ui-amethyst').innerText = this.player.inventory.amethyst;
+        for (const ore of ORES) {
+            const uiEl = document.getElementById(`ui-${ore.key}`);
+            if (uiEl) uiEl.innerText = this.player.inventory[ore.key];
+        }
 
         const sellPreview = this.getSellPreview();
         document.getElementById('ui-sell-preview').innerText = `$${sellPreview}`;
         document.getElementById('ui-money-menu').innerText = this.player.money;
         document.getElementById('ui-smelt-mult').innerText = `${this.player.sellMultiplier.toFixed(2)}×`;
-        document.getElementById('ui-coal-menu').innerText = this.player.inventory.coal;
-        document.getElementById('ui-iron-menu').innerText = this.player.inventory.iron;
-        document.getElementById('ui-gold-menu').innerText = this.player.inventory.gold;
-        document.getElementById('ui-diamond-menu').innerText = this.player.inventory.diamond;
-        document.getElementById('ui-emerald-menu').innerText = this.player.inventory.emerald;
-        document.getElementById('ui-ruby-menu').innerText = this.player.inventory.ruby;
-        document.getElementById('ui-sapphire-menu').innerText = this.player.inventory.sapphire;
-        document.getElementById('ui-amethyst-menu').innerText = this.player.inventory.amethyst;
+        for (const ore of ORES) {
+            const uiMenuEl = document.getElementById(`ui-${ore.key}-menu`);
+            if (uiMenuEl) uiMenuEl.innerText = this.player.inventory[ore.key];
+        }
         
         // Update Shop Costs
         document.getElementById('cost-pick').innerText = `$${this.player.levels.pick * 100}`;
@@ -2517,6 +2996,10 @@ class Game {
         document.getElementById('cost-smelt').innerText = `$${this.player.levels.smelt * 400}`;
         document.getElementById('cost-luck').innerText = `$${this.player.levels.luck * 500}`;
         document.getElementById('cost-drill').innerText = `$${this.player.levels.drill * 650}`;
+        document.getElementById('cost-xp').innerText = `$${this.player.levels.xp * 350}`;
+        document.getElementById('cost-crit').innerText = `$${this.player.levels.crit * 450}`;
+        document.getElementById('cost-rigcore').innerText = `$${this.player.levels.rigcore * 550}`;
+        document.getElementById('cost-magnet').innerText = `$${this.player.levels.magnet * 500}`;
         document.getElementById('cost-rig').innerText = `$${this.getDrillRigCost()}`;
         
         // Enable/Disable buttons
@@ -2527,19 +3010,19 @@ class Game {
         document.getElementById('btn-upg-smelt').disabled = this.player.money < this.player.levels.smelt * 400;
         document.getElementById('btn-upg-luck').disabled = this.player.money < this.player.levels.luck * 500;
         document.getElementById('btn-upg-drill').disabled = this.player.money < this.player.levels.drill * 650;
+        document.getElementById('btn-upg-xp').disabled = this.player.money < this.player.levels.xp * 350;
+        document.getElementById('btn-upg-crit').disabled = this.player.money < this.player.levels.crit * 450;
+        document.getElementById('btn-upg-rigcore').disabled = this.player.money < this.player.levels.rigcore * 550;
+        document.getElementById('btn-upg-magnet').disabled = this.player.money < this.player.levels.magnet * 500;
         document.getElementById('btn-buy-rig').disabled = this.player.money < this.getDrillRigCost();
+        this.updateXpUi();
     }
 
     getSellPreview() {
         let total = 0;
-        total += this.player.inventory.coal * ORE_VALUE.coal;
-        total += this.player.inventory.iron * ORE_VALUE.iron;
-        total += this.player.inventory.gold * ORE_VALUE.gold;
-        total += this.player.inventory.diamond * ORE_VALUE.diamond;
-        total += this.player.inventory.emerald * ORE_VALUE.emerald;
-        total += this.player.inventory.ruby * ORE_VALUE.ruby;
-        total += this.player.inventory.sapphire * ORE_VALUE.sapphire;
-        total += this.player.inventory.amethyst * ORE_VALUE.amethyst;
+        for (const ore of ORES) {
+            total += this.player.inventory[ore.key] * ORE_VALUE[ore.key];
+        }
         return Math.floor(total * this.player.sellMultiplier);
     }
 
@@ -2556,6 +3039,8 @@ class Game {
                 y: this.player.y,
                 money: this.player.money,
                 inventory: this.player.inventory,
+                level: this.player.level,
+                xp: this.player.xp,
                 drillRigs: this.player.drillRigs,
                 miningPower: this.player.miningPower,
                 lightRadius: this.player.lightRadius,
@@ -2564,6 +3049,12 @@ class Game {
                 miningInterval: this.player.miningInterval,
                 sellMultiplier: this.player.sellMultiplier,
                 luck: this.player.luck,
+                xpBoost: this.player.xpBoost,
+                critChance: this.player.critChance,
+                critMultiplier: this.player.critMultiplier,
+                drillPower: this.player.drillPower,
+                drillInterval: this.player.drillInterval,
+                oreBonus: this.player.oreBonus,
                 levels: this.player.levels
             },
             map: mapState,
@@ -2580,17 +3071,29 @@ class Game {
         if (p && Number.isFinite(p.x) && Number.isFinite(p.y)) {
             this.player.x = p.x;
             this.player.y = p.y;
-            this.player.money = p.money || 0;
-            this.player.inventory = p.inventory || this.player.inventory;
-            this.player.drillRigs = p.drillRigs || 0;
-            this.player.miningPower = p.miningPower || this.player.miningPower;
-            this.player.lightRadius = p.lightRadius || this.player.lightRadius;
-            this.player.maxSpeed = p.maxSpeed || this.player.maxSpeed;
-            this.player.miningRange = p.miningRange || this.player.miningRange;
-            this.player.miningInterval = p.miningInterval || this.player.miningInterval;
-            this.player.sellMultiplier = p.sellMultiplier || this.player.sellMultiplier;
-            this.player.luck = p.luck || this.player.luck;
-            this.player.levels = p.levels || this.player.levels;
+            this.player.money = Number.isFinite(p.money) ? p.money : 0;
+            this.player.inventory = normalizeInventory(p.inventory);
+            this.player.level = Number.isFinite(p.level) ? Math.max(1, Math.floor(p.level)) : this.player.level;
+            this.player.xp = Number.isFinite(p.xp) ? Math.max(0, Math.floor(p.xp)) : this.player.xp;
+            this.player.drillRigs = Number.isFinite(p.drillRigs) ? p.drillRigs : 0;
+            this.player.miningPower = Number.isFinite(p.miningPower) ? p.miningPower : this.player.miningPower;
+            this.player.lightRadius = Number.isFinite(p.lightRadius) ? p.lightRadius : this.player.lightRadius;
+            this.player.maxSpeed = Number.isFinite(p.maxSpeed) ? p.maxSpeed : this.player.maxSpeed;
+            this.player.miningRange = Number.isFinite(p.miningRange) ? p.miningRange : this.player.miningRange;
+            this.player.miningInterval = Number.isFinite(p.miningInterval) ? p.miningInterval : this.player.miningInterval;
+            this.player.sellMultiplier = Number.isFinite(p.sellMultiplier) ? p.sellMultiplier : this.player.sellMultiplier;
+            this.player.luck = Number.isFinite(p.luck) ? p.luck : this.player.luck;
+            this.player.xpBoost = Number.isFinite(p.xpBoost) ? p.xpBoost : this.player.xpBoost;
+            this.player.critChance = Number.isFinite(p.critChance) ? p.critChance : this.player.critChance;
+            this.player.critMultiplier = Number.isFinite(p.critMultiplier) ? p.critMultiplier : this.player.critMultiplier;
+            this.player.drillPower = Number.isFinite(p.drillPower) ? p.drillPower : this.player.drillPower;
+            this.player.drillInterval = Number.isFinite(p.drillInterval) ? p.drillInterval : this.player.drillInterval;
+            this.player.oreBonus = Number.isFinite(p.oreBonus) ? p.oreBonus : this.player.oreBonus;
+            this.player.levels = normalizeLevels(p.levels);
+            while (this.player.xp >= xpForLevel(this.player.level)) {
+                this.player.xp -= xpForLevel(this.player.level);
+                this.player.level += 1;
+            }
         }
         const m = state.map;
         if (m && Array.isArray(m.tiles) && Array.isArray(m.hp)) {
@@ -3027,6 +3530,7 @@ function createNewMine() {
 
 function bootGame() {
     SaveManager.ensureCurrentSlot();
+    OreUi.init();
     ForgeUi.init();
     MinesUi.init();
     const save = SaveManager.load();
@@ -3034,6 +3538,7 @@ function bootGame() {
     const seed = (save && Number.isFinite(save.worldSeed)) ? (save.worldSeed >>> 0) : (slot && Number.isFinite(slot.seed) ? (slot.seed >>> 0) : 0);
     game = new Game(seed);
     if (save) game.applySaveState(save);
+    game.updateUi();
     gameRunning = true;
     requestAnimationFrame(loop);
 
